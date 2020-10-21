@@ -34,6 +34,8 @@ import android.app.Activity;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.appcompat.widget.LinearLayoutCompat;
+
 import org.scijava.android.R;
 import org.scijava.widget.AbstractInputPanel;
 import org.scijava.widget.InputPanel;
@@ -85,8 +87,7 @@ public class AndroidInputPanel extends AbstractInputPanel<ViewGroup, ViewGroup> 
 	@Override
 	public ViewGroup getComponent() {
 		if (uiComponent == null) {
-			ViewGroup root = activity.findViewById(R.id.scijava_control);
-			uiComponent = (ViewGroup) activity.getLayoutInflater().inflate(R.layout.scijava_input_panel, root, false);
+			uiComponent = new LinearLayoutCompat(activity, null, R.style.scijava_input_panel);
 		}
 		return uiComponent;
 	}

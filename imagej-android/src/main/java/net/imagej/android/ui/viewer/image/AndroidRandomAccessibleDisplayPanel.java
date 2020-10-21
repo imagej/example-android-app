@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import org.scijava.android.R;
 import org.scijava.android.ui.viewer.text.AndroidDisplayPanel;

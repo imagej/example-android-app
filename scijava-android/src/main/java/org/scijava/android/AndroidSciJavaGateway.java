@@ -37,9 +37,13 @@ import android.view.ViewGroup;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import org.scijava.AbstractGateway;
 import org.scijava.Context;
 import org.scijava.Gateway;
+import org.scijava.android.AndroidService;
 import org.scijava.app.App;
 import org.scijava.app.AppService;
 import org.scijava.plugin.Plugin;
@@ -74,6 +78,12 @@ public class AndroidSciJavaGateway extends AbstractGateway {
 		super(NAME, context);
 
 		get(AndroidService.class).setActivity(activity);
+
+
+//		RecyclerView controlView = activity.findViewById(R.id.scijava_control);
+//		if(controlView != null) {
+//			controlView.setLayoutManager(new LinearLayoutManager(activity));
+//		}
 
 //		// make view and control list scale item to full width if only one item is present
 //		setSingleItemFullWidth(activity.findViewById(R.id.scijava_view));

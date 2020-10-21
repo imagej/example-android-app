@@ -31,7 +31,6 @@
 package org.scijava.android.ui.widget;
 
 import android.view.ViewGroup;
-import android.widget.ListView;
 
 import androidx.annotation.NonNull;
 

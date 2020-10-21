@@ -31,10 +31,10 @@
 package org.scijava.android.ui.widget;
 
 import android.app.AlertDialog;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 import org.scijava.android.AndroidService;
 import org.scijava.android.R;
@@ -83,7 +83,7 @@ public class AndroidInputHarvester extends
 		final boolean modal = !module.getInfo().isInteractive();
 		final boolean allowCancel = module.getInfo().canCancel();
 
-		LinearLayout controlView = androidService.getActivity().findViewById(R.id.scijava_control);
+		ViewGroup controlView = androidService.getActivity().findViewById(R.id.scijava_control);
 		if(controlView == null) {
 			AlertDialog.Builder builder = new AlertDialog.Builder(androidService.getActivity());
 			builder.setTitle(title)

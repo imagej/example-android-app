@@ -42,14 +42,12 @@ import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.prefs.PrefService;
-import org.scijava.service.AbstractService;
 import org.scijava.service.Service;
 import org.scijava.text.TextService;
 import org.scijava.ui.UIService;
 import org.scijava.ui.event.UIShownEvent;
 import org.scijava.util.DigestUtils;
 import org.scijava.welcome.DefaultWelcomeService;
-import org.scijava.welcome.WelcomeService;
 import org.scijava.welcome.event.WelcomeEvent;
 
 /**

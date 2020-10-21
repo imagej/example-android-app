@@ -30,6 +30,7 @@
 
 package org.scijava.android.ui.widget;
 
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -56,7 +57,7 @@ import java.lang.reflect.InvocationTargetException;
  */
 @Plugin(type = InputWidget.class)
 public class AndroidNumberWidget extends AndroidInputWidget<Number> implements
-		NumberWidget<ViewGroup>, Slider.OnChangeListener, Slider.OnSliderTouchListener {
+		NumberWidget<View>, Slider.OnChangeListener, Slider.OnSliderTouchListener {
 
 	@Parameter
 	private ThreadService threadService;
@@ -117,7 +118,6 @@ public class AndroidNumberWidget extends AndroidInputWidget<Number> implements
 					slider.setValueTo(max.floatValue());
 				}
 				slider.setValue(value.floatValue());
-				getComponent().addView(slider);
 				slider.addOnChangeListener(this);
 
 				slider.addOnSliderTouchListener(this);
@@ -132,7 +132,7 @@ public class AndroidNumberWidget extends AndroidInputWidget<Number> implements
 
 	@Override
 	public boolean supports(final WidgetModel model) {
-		return super.supports(model) && model.isNumber();
+		return model.isNumber();
 	}
 
 	@Override
@@ -157,5 +157,10 @@ public class AndroidNumberWidget extends AndroidInputWidget<Number> implements
 	@Override
 	public void onStopTrackingTouch(@NonNull Slider slider) {
 		threadService.run(this::updateModel);
+	}
+
+	@Override
+	public View getComponent() {
+		return slider;
 	}
 }

@@ -30,6 +30,7 @@
 
 package org.scijava.android.ui.widget;
 
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.appcompat.widget.LinearLayoutCompat;
@@ -48,33 +49,11 @@ import org.scijava.widget.WidgetModel;
  * @author Deborah Schmidt
  */
 public abstract class AndroidInputWidget<T> extends
-	AbstractUIInputWidget<T, ViewGroup>
+	AbstractUIInputWidget<T, View>
 {
-
-	@Parameter
-	AndroidService androidService;
-
-	private LinearLayoutCompat uiComponent;
-
-	// -- WrapperPlugin methods --
-
 	@Override
-	public void set(final WidgetModel model) {
-		super.set(model);
-//		ViewGroup root = androidService.getActivity().findViewById(R.id.scijava_control);
-		uiComponent = new LinearLayoutCompat(androidService.getActivity(), null, R.style.scijava_input_widget);
-	}
-
-	// -- UIComponent methods --
-
-	@Override
-	public ViewGroup getComponent() {
-		return uiComponent;
-	}
-
-	@Override
-	public Class<ViewGroup> getComponentType() {
-		return ViewGroup.class;
+	public Class<View> getComponentType() {
+		return View.class;
 	}
 
 	// -- AbstractUIInputWidget methods --

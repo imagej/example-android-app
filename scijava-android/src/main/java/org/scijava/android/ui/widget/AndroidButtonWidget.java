@@ -30,6 +30,7 @@
 
 package org.scijava.android.ui.widget;
 
+import android.view.View;
 import android.view.ViewGroup;
 import org.scijava.android.AndroidService;
 import org.scijava.plugin.Parameter;
@@ -47,7 +48,7 @@ import org.scijava.widget.WidgetModel;
  */
 @Plugin(type = InputWidget.class)
 public class AndroidButtonWidget extends AndroidInputWidget<Button> implements
-	ButtonWidget<ViewGroup>
+	ButtonWidget<View>
 {
 
 	@Parameter
@@ -80,18 +81,17 @@ public class AndroidButtonWidget extends AndroidInputWidget<Button> implements
 				// call the code attached to this button
 				model.callback();
 
-				// make sure panel owning button is refreshed in case button changed
-				// some panel fields
-				get().getPanel().refresh();
+//				// make sure panel owning button is refreshed in case button changed
+//				// some panel fields
+//				get().getPanel().refresh();
 		});
-		getComponent().addView(button);
 	}
 
 	// -- Typed methods --
 
 	@Override
 	public boolean supports(final WidgetModel model) {
-		return super.supports(model) && model.isType(Button.class);
+		return model.isType(Button.class);
 	}
 
 	// -- AbstractUIInputWidget methods ---
@@ -100,5 +100,10 @@ public class AndroidButtonWidget extends AndroidInputWidget<Button> implements
 	public void doRefresh() {
 		// maybe dialog owner changed name of button
 		button.setText(get().getWidgetLabel());
+	}
+
+	@Override
+	public android.widget.Button getComponent() {
+		return button;
 	}
 }

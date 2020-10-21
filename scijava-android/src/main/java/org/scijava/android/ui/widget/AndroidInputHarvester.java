@@ -1,9 +1,8 @@
 /*
  * #%L
- * SciJava UI components for Java Swing.
+ * SciJava Common shared library for SciJava software.
  * %%
- * Copyright (C) 2010 - 2017 Board of Regents of the University of
- * Wisconsin-Madison.
+ * Copyright (C) 2009 - 2020 SciJava developers.
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -34,49 +33,31 @@ import android.app.AlertDialog;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.scijava.AbstractContextual;
 import org.scijava.android.AndroidService;
 import org.scijava.android.R;
-import org.scijava.android.ui.AndroidUI;
 import org.scijava.module.Module;
 import org.scijava.module.process.PreprocessorPlugin;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.thread.ThreadService;
-import org.scijava.ui.AbstractInputHarvesterPlugin;
 import org.scijava.widget.InputHarvester;
-import org.scijava.widget.InputPanel;
 
-/**
- * SwingInputHarvester is an {@link InputHarvester} that collects input
- * parameter values from the user using a {@link AndroidInputPanel} dialog box.
- * 
- * @author Deborah Schmidt
- */
+
 @Plugin(type = PreprocessorPlugin.class, priority = InputHarvester.PRIORITY)
-public class AndroidInputHarvester extends
-	AbstractInputHarvesterPlugin<ViewGroup, ViewGroup>
-{
+public class AndroidInputHarvester extends AbstractContextual implements PreprocessorPlugin {
 
 	@Parameter
-	AndroidService androidService;
+	private AndroidService androidService;
 
 	@Parameter
-	ThreadService threadService;
-
-	// -- InputHarvester methods --
+	private ThreadService threadService;
 
 	@Override
-	public AndroidInputPanel createInputPanel() {
-		return new AndroidInputPanel(androidService.getActivity());
-	}
-
-	@Override
-	public boolean harvestInputs(final InputPanel<ViewGroup, ViewGroup> inputPanel,
-		final Module module)
-	{
-		final ViewGroup pane = inputPanel.getComponent();
+	public void process(Module module) {
 
 		// display input panel in a dialog
 		final String title = module.getInfo().getTitle();
@@ -86,8 +67,9 @@ public class AndroidInputHarvester extends
 		ViewGroup controlView = androidService.getActivity().findViewById(R.id.scijava_control);
 		if(controlView == null) {
 			AlertDialog.Builder builder = new AlertDialog.Builder(androidService.getActivity());
+			ViewGroup view = setupAdapter(module, null);
 			builder.setTitle(title)
-					.setView(pane);
+					.setView(view.findViewById(R.id.scijava_control_panel_rw));
 
 			builder.setNeutralButton("Close", (dialog, which) -> {
 				dialog.dismiss();
@@ -98,22 +80,36 @@ public class AndroidInputHarvester extends
 			});
 		} else {
 			threadService.queue(() -> {
-				ViewGroup uiComponent = (ViewGroup) androidService.getActivity().getLayoutInflater().inflate(R.layout.scijava_control_window, controlView, false);
-				ViewGroup content = uiComponent.findViewById(R.id.content);
+				ViewGroup uiComponent = setupAdapter(module, controlView);
 				TextView titleView = uiComponent.findViewById(R.id.title);
-				content.addView(pane);
 				titleView.setText(title);
 				controlView.addView(uiComponent);
 			});
 		}
-		return true;
+
 	}
 
-	// -- Internal methods --
+	private ViewGroup setupAdapter(Module module, ViewGroup root) {
+		ViewGroup controlWindow = (ViewGroup) androidService.getActivity().getLayoutInflater().inflate(R.layout.scijava_control_window, root, false);
+		RecyclerView rvInputs = controlWindow.findViewById(R.id.scijava_control_panel_rw);
+		ModuleInputsAdapter adapter = new ModuleInputsAdapter(context(), module);
+		rvInputs.setAdapter(adapter);
+		rvInputs.setLayoutManager(new LinearLayoutManager(androidService.getActivity()));
+		return controlWindow;
+	}
 
 	@Override
-	protected String getUI() {
-		return AndroidUI.NAME;
+	public boolean isCanceled() {
+		return false;
 	}
 
+	@Override
+	public void cancel(String reason) {
+
+	}
+
+	@Override
+	public String getCancelReason() {
+		return null;
+	}
 }

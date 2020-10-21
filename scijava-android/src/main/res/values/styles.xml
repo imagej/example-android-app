@@ -4,14 +4,14 @@
     <style name="scijava_default" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
     </style>
 
-    <style name="scijava_view_panel" parent="CardView">
+    <style name="scijava_view_window" parent="CardView">
         <item name="android:layout_gravity">center</item>
         <item name="android:layout_width">200dp</item>
         <item name="android:layout_height">match_parent</item>
         <item name="cardCornerRadius">4dp</item>
         <item name="android:layout_margin">@dimen/margin</item>
     </style>
-    <style name="scijava_control_panel" parent="scijava_view_panel">
+    <style name="scijava_control_window" parent="scijava_view_window">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_weight">1</item>
         <item name="android:minWidth">200dp</item>

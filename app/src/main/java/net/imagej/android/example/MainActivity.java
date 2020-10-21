@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private ASCIICommand asciiCommand;
     private CameraHandler cameraHandler;
     private ViewGroup scijavaView;
+    private AndroidSciJavaGateway gateway;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +70,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initGatewayAndServices() {
-        AndroidSciJavaGateway gateway = new AndroidSciJavaGateway(new org.scijava.Context(), this);
+
+        gateway = new AndroidSciJavaGateway(new org.scijava.Context(), this);
         gateway.launch();
         commandService = gateway.get(CommandService.class);
     }
@@ -82,6 +84,12 @@ public class MainActivity extends AppCompatActivity {
         asciiCommand = new ASCIICommand();
         commandService.context().inject(asciiCommand);
         commandService.moduleService().run(asciiCommand, true, "input", img);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        gateway.dispose();
     }
 
     private void setContentViewLayout() {

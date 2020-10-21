@@ -1,0 +1,4 @@
+include ':scijava-android'
+include ':imagej-android'
+include ':app'
+rootProject.name = "imagej-android"

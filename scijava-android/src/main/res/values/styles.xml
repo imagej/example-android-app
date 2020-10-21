@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <style name="scijava_default" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+    </style>
+
+    <style name="scijava_view_panel" parent="CardView">
+        <item name="android:layout_gravity">center</item>
+        <item name="android:layout_width">200dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="cardCornerRadius">4dp</item>
+        <item name="android:layout_margin">@dimen/margin</item>
+    </style>
+    <style name="scijava_control_panel" parent="scijava_view_panel">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:minWidth">200dp</item>
+    </style>
+
+    <style name="scijava_input_widget">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+</resources>

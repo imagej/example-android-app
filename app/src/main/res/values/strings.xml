@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">imagej-android-app</string>
+    <string name="no_permission">No permission to access the camera.</string>
+    <string name="take_picture">Take picture</string>
+</resources>

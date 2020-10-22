@@ -70,11 +70,11 @@ public class AndroidTextDisplayPanel implements TextDisplayPanel, AndroidDisplay
 		// The strategy is to compare the lines in the text area against
 		// those in the display. We clear the control if we find a mismatch.
 
-		final StringBuffer targetText = new StringBuffer();
-		for (final Object line : display) {
-			targetText.append(line.toString() + "\n");
-		}
-		final String text = targetText.toString();
+//		final StringBuffer targetText = new StringBuffer();
+//		for (final Object line : display) {
+//			targetText.append(line.toString() + "\n");
+//		}
+		final String text = display.get(display.size()-1);
 		final boolean html = text.startsWith("<html>");
 		if(html) {
 			panel.setText(Html.fromHtml(text));

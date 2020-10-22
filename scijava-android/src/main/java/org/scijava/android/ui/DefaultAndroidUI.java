@@ -32,13 +32,12 @@ package org.scijava.android.ui;
 
 import android.view.ViewGroup;
 
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.scijava.Context;
 import org.scijava.android.AndroidService;
 import org.scijava.android.R;
-import org.scijava.android.ui.widget.ModuleInputsAdapter;
+import org.scijava.android.ui.viewer.module.ModuleDisplay;
 import org.scijava.app.AppService;
 import org.scijava.display.Display;
 import org.scijava.event.EventHandler;
@@ -47,18 +46,13 @@ import org.scijava.log.LogService;
 import org.scijava.menu.MenuService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import org.scijava.plugin.PluginInfo;
-import org.scijava.plugin.PluginService;
 import org.scijava.thread.ThreadService;
 import org.scijava.ui.AbstractUserInterface;
 import org.scijava.ui.DialogPrompt;
 import org.scijava.ui.SystemClipboard;
 import org.scijava.ui.UIService;
 import org.scijava.ui.UserInterface;
-import org.scijava.ui.viewer.DisplayViewer;
 import org.scijava.ui.viewer.DisplayWindow;
-
-import java.util.List;
 
 /**
  * Implementation for Android-based user interfaces.
@@ -99,7 +93,8 @@ public class DefaultAndroidUI extends AbstractUserInterface implements
 	private AndroidConsolePane consolePane;
 	private AndroidClipboard systemClipboard;
 
-	private DisplayWindowsAdapter adapter;
+	private DisplayWindowsAdapter viewAdapter;
+	private DisplayWindowsAdapter controlAdapter;
 
 	// -- UserInterface methods --
 
@@ -130,7 +125,11 @@ public class DefaultAndroidUI extends AbstractUserInterface implements
 
 	@Override
 	public DisplayWindow createDisplayWindow(Display<?> display) {
-		return new AndroidDisplayWindow(display, adapter);
+		if(display instanceof ModuleDisplay) {
+			return new AndroidDisplayWindow(display, controlAdapter);
+		} else {
+			return new AndroidDisplayWindow(display, viewAdapter);
+		}
 	}
 
 	@Override
@@ -150,12 +149,18 @@ public class DefaultAndroidUI extends AbstractUserInterface implements
 	}
 
 	@EventHandler
-	private void initAdapter(final org.scijava.ui.event.UIShownEvent e) {
+	private void initAdapters(final org.scijava.ui.event.UIShownEvent e) {
 		threadService.queue(() -> {
-			ViewGroup view = androidService.getActivity().findViewById(R.id.scijava_view);
-			RecyclerView rv = view.findViewById(R.id.scijava_view_rw);
-			adapter = new DisplayWindowsAdapter(getContext());
-			rv.setAdapter(adapter);
+			viewAdapter = initAdapter(R.id.scijava_view, R.id.scijava_view_rw, R.layout.scijava_view_window);
+			controlAdapter = initAdapter(R.id.scijava_control, R.id.scijava_control_rw, R.layout.scijava_control_window);
 		});
+	}
+
+	private DisplayWindowsAdapter initAdapter(int parentId, int recyclerId, int adapterLayoutId) {
+		ViewGroup view = androidService.getActivity().findViewById(parentId);
+		RecyclerView rv = view.findViewById(recyclerId);
+		DisplayWindowsAdapter adapter = new DisplayWindowsAdapter(getContext(), adapterLayoutId);
+		rv.setAdapter(adapter);
+		return adapter;
 	}
 }

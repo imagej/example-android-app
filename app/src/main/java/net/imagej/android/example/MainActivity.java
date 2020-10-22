@@ -15,7 +15,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import net.imagej.android.ImgLibUtils;
 import net.imagej.example.R;
-import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.type.numeric.ARGBType;
@@ -30,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
 
     private AndroidGateway gateway;
 
-    private ASCIICommand asciiCommand;
+//    private ASCIICommand asciiCommand;
 
     private CameraHandler cameraHandler;
     private RandomAccessibleInterval<ARGBType> img;
@@ -76,10 +75,11 @@ public class MainActivity extends AppCompatActivity {
         gateway.launch();
     }
 
-    private void launchAsciiCommand() {
-        asciiCommand = new ASCIICommand();
+    private ASCIICommand launchAsciiCommand() {
+        ASCIICommand asciiCommand = new ASCIICommand();
         gateway.context().inject(asciiCommand);
         gateway.module().run(asciiCommand, true, "input", img);
+        return asciiCommand;
     }
 
     @Override
@@ -131,8 +131,8 @@ public class MainActivity extends AppCompatActivity {
         if(bytes != null) {
             gateway.thread().run(() -> {
                 makeImage(bytes, camera.getParameters().getPictureSize());
-                if(asciiCommand == null) launchAsciiCommand();
-                asciiCommand.setInput("input", img);
+                ASCIICommand command = launchAsciiCommand();
+                command.setInput(img);
             });
         }
     }
@@ -144,15 +144,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupShareButton() {
-        View button = findViewById(R.id.share_button);
-        button.setOnClickListener(view -> {
-            String text = (String) asciiCommand.getOutput("output");
-            Intent sendIntent = new Intent();
-            sendIntent.setAction(Intent.ACTION_SEND);
-            sendIntent.putExtra(Intent.EXTRA_TEXT, text);
-            sendIntent.setType("text/plain");
-            Intent shareIntent = Intent.createChooser(sendIntent, null);
-            startActivity(shareIntent);
-        });
+//        View button = findViewById(R.id.share_button);
+//        button.setOnClickListener(view -> {
+//            String text = (String) asciiCommand.getOutput("output");
+//            Intent sendIntent = new Intent();
+//            sendIntent.setAction(Intent.ACTION_SEND);
+//            sendIntent.putExtra(Intent.EXTRA_TEXT, text);
+//            sendIntent.setType("text/plain");
+//            Intent shareIntent = Intent.createChooser(sendIntent, null);
+//            startActivity(shareIntent);
+//        });
     }
 }

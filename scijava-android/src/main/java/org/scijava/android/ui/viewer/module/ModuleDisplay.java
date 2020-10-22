@@ -27,56 +27,16 @@
  * #L%
  */
 
-package org.scijava.android.ui.widget;
+package org.scijava.android.ui.viewer.module;
 
-import android.app.AlertDialog;
-import android.view.ViewGroup;
-import android.widget.TextView;
-
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import org.scijava.AbstractContextual;
-import org.scijava.android.AndroidService;
-import org.scijava.android.R;
+import org.scijava.display.Display;
 import org.scijava.module.Module;
-import org.scijava.module.process.PreprocessorPlugin;
-import org.scijava.plugin.Parameter;
-import org.scijava.plugin.Plugin;
-import org.scijava.thread.ThreadService;
-import org.scijava.ui.UIService;
-import org.scijava.widget.InputHarvester;
 
+/**
+ * Interface for {@link Module} {@link Display}s.
+ * 
+ * @author Deborah Schmidt
+ */
+public interface ModuleDisplay extends Display<Module> {
 
-@Plugin(type = PreprocessorPlugin.class, priority = InputHarvester.PRIORITY)
-public class AndroidInputHarvester extends AbstractContextual implements PreprocessorPlugin {
-
-	@Parameter
-	private AndroidService androidService;
-
-	@Parameter
-	private ThreadService threadService;
-
-	@Parameter
-	private UIService uiService;
-
-	@Override
-	public void process(Module module) {
-		uiService.show(module.getInfo().getTitle(), module);
-	}
-
-	@Override
-	public boolean isCanceled() {
-		return false;
-	}
-
-	@Override
-	public void cancel(String reason) {
-
-	}
-
-	@Override
-	public String getCancelReason() {
-		return null;
-	}
 }

@@ -31,6 +31,8 @@ package org.scijava.android.ui;
 
 import org.scijava.android.ui.viewer.AndroidDisplayPanel;
 import org.scijava.display.Display;
+import org.scijava.display.event.DisplayUpdatedEvent;
+import org.scijava.event.EventHandler;
 import org.scijava.ui.viewer.DisplayPanel;
 import org.scijava.ui.viewer.DisplayWindow;
 
@@ -92,5 +94,12 @@ public class AndroidDisplayWindow implements DisplayWindow {
 	public int findDisplayContentScreenY() {
 		// TODO
 		return 0;
+	}
+
+	@EventHandler
+	public void onDisplayUpdate(final DisplayUpdatedEvent e) {
+		if(e.getDisplay().equals(display)) {
+			panel.redraw();
+		}
 	}
 }

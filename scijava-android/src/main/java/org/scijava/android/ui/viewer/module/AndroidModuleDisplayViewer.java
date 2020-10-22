@@ -1,8 +1,9 @@
 /*
  * #%L
- * SciJava Common shared library for SciJava software.
+ * SciJava UI components for Java Swing.
  * %%
- * Copyright (C) 2009 - 2020 SciJava developers.
+ * Copyright (C) 2010 - 2017 Board of Regents of the University of
+ * Wisconsin-Madison.
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,29 +28,27 @@
  * #L%
  */
 
-package org.scijava.android.ui.widget;
+package org.scijava.android.ui.viewer.module;
 
-import android.app.AlertDialog;
-import android.view.ViewGroup;
-import android.widget.TextView;
-
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import org.scijava.AbstractContextual;
 import org.scijava.android.AndroidService;
-import org.scijava.android.R;
+import org.scijava.android.ui.AndroidUI;
+import org.scijava.display.Display;
 import org.scijava.module.Module;
-import org.scijava.module.process.PreprocessorPlugin;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.thread.ThreadService;
-import org.scijava.ui.UIService;
-import org.scijava.widget.InputHarvester;
+import org.scijava.ui.UserInterface;
+import org.scijava.ui.viewer.AbstractDisplayViewer;
+import org.scijava.ui.viewer.DisplayViewer;
+import org.scijava.ui.viewer.DisplayWindow;
 
-
-@Plugin(type = PreprocessorPlugin.class, priority = InputHarvester.PRIORITY)
-public class AndroidInputHarvester extends AbstractContextual implements PreprocessorPlugin {
+/**
+ * An Android module display viewer
+ * 
+ * @author Deborah Schmidt
+ */
+@Plugin(type = DisplayViewer.class)
+public class AndroidModuleDisplayViewer  extends AbstractDisplayViewer<Module> {
 
 	@Parameter
 	private AndroidService androidService;
@@ -57,26 +56,20 @@ public class AndroidInputHarvester extends AbstractContextual implements Preproc
 	@Parameter
 	private ThreadService threadService;
 
-	@Parameter
-	private UIService uiService;
-
 	@Override
-	public void process(Module module) {
-		uiService.show(module.getInfo().getTitle(), module);
+	public boolean isCompatible(final UserInterface ui) {
+		return ui instanceof AndroidUI;
 	}
 
 	@Override
-	public boolean isCanceled() {
-		return false;
+	public boolean canView(Display<?> d) {
+		return d instanceof ModuleDisplay;
 	}
 
 	@Override
-	public void cancel(String reason) {
-
+	public void view(final DisplayWindow w, final Display<?> d) {
+		super.view(w, d);
+		setPanel(new AndroidModuleDisplayPanel((ModuleDisplay)d, w, androidService.getActivity()));
 	}
 
-	@Override
-	public String getCancelReason() {
-		return null;
-	}
 }

@@ -5,20 +5,23 @@ import net.imagej.ops.OpService;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.Converters;
 import net.imglib2.type.numeric.ARGBType;
-import net.imglib2.type.numeric.integer.ByteType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.view.Views;
 
+import org.scijava.InstantiableException;
 import org.scijava.ItemIO;
+import org.scijava.android.command.InteractiveCommandDisplayUpdate;
 import org.scijava.command.Command;
-import org.scijava.command.InteractiveCommand;
+import org.scijava.display.DisplayPostprocessor;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import org.scijava.ui.UIService;
+import org.scijava.plugin.PluginInfo;
+import org.scijava.plugin.PluginService;
+import org.scijava.plugin.SciJavaPlugin;
 
-@Plugin(type = Command.class, name = "ASCIICommand")
-public class ASCIICommand extends InteractiveCommand {
+@Plugin(type = Command.class, name = "ASCII converter")
+public class ASCIICommand extends InteractiveCommandDisplayUpdate {
 
     @Parameter
     private RandomAccessibleInterval<ARGBType> input;
@@ -32,8 +35,11 @@ public class ASCIICommand extends InteractiveCommand {
     @Parameter
     private LogService logService;
 
-    @Parameter
-    private UIService uiService;
+    @Parameter(type = ItemIO.OUTPUT)
+    private RandomAccessibleInterval<UnsignedByteType> slice;
+
+    @Parameter(type = ItemIO.OUTPUT)
+    private String ascii;
 
     @Override
     public void run() {
@@ -42,15 +48,26 @@ public class ASCIICommand extends InteractiveCommand {
             return;
         }
         RandomAccessibleInterval<UnsignedByteType> slice = convertGray(input);
-        uiService.show("blue channel", slice);
+        setOutput("slice", slice);
         RandomAccessibleInterval<UnsignedByteType> gray = ImgLibUtils.scale(slice, scale);
         String ascii = opService.image().ascii(Views.iterable(gray));
-        uiService.show("ascii", ascii);
+        setOutput("ascii", ascii);
         saveInputs();
+    }
+
+    @Override
+    public void setOutput(String _name, Object value) {
+        if(!getOutputs().containsKey(_name)) {
+            super.addOutput(_name, value.getClass());
+        }
+        super.setOutput(_name, value);
     }
 
     private RandomAccessibleInterval<UnsignedByteType> convertGray(RandomAccessibleInterval<ARGBType> img) {
         return Converters.argbChannel( img, 2 );
     }
 
+    public void setInput(RandomAccessibleInterval<ARGBType> img) {
+        input = img;
+    }
 }

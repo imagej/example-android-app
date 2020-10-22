@@ -30,6 +30,7 @@
 
 package org.scijava.android.ui.widget;
 
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -57,7 +58,7 @@ import java.lang.reflect.InvocationTargetException;
  */
 @Plugin(type = InputWidget.class)
 public class AndroidNumberWidget extends AndroidInputWidget<Number> implements
-		NumberWidget<View>, Slider.OnChangeListener, Slider.OnSliderTouchListener {
+		NumberWidget<View>, Slider.OnChangeListener, Slider.OnSliderTouchListener, View.OnTouchListener {
 
 	@Parameter
 	private ThreadService threadService;
@@ -121,6 +122,9 @@ public class AndroidNumberWidget extends AndroidInputWidget<Number> implements
 				slider.addOnChangeListener(this);
 
 				slider.addOnSliderTouchListener(this);
+
+				slider.setOnTouchListener(this);
+
 				refreshWidget();
 			});
 		} catch (InterruptedException | InvocationTargetException e) {
@@ -162,5 +166,26 @@ public class AndroidNumberWidget extends AndroidInputWidget<Number> implements
 	@Override
 	public View getComponent() {
 		return slider;
+	}
+
+	@Override
+	public boolean onTouch(View v, MotionEvent event) {
+		int action = event.getAction();
+		switch (action)
+		{
+			case MotionEvent.ACTION_DOWN:
+				// Disallow ScrollView to intercept touch events.
+				v.getParent().requestDisallowInterceptTouchEvent(true);
+				break;
+
+			case MotionEvent.ACTION_UP:
+				// Allow ScrollView to intercept touch events.
+				v.getParent().requestDisallowInterceptTouchEvent(false);
+				break;
+		}
+
+		// Handle Seekbar touch events.
+		v.onTouchEvent(event);
+		return false;
 	}
 }

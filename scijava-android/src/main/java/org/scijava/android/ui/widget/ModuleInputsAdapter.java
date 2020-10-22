@@ -46,9 +46,13 @@ public class ModuleInputsAdapter extends
 
     private final List<Pair<ImprovedWidgetModel, InputWidget<?,?>>> inputs;
 
-    public ModuleInputsAdapter(Context context, Module module) {
+    public ModuleInputsAdapter(Context context) {
         setContext(context);
         inputs = new ArrayList<>();
+    }
+
+    public void load(Module module) {
+        inputs.clear();
         module.getInfo().inputs().forEach(moduleItem -> {
             try {
                 ImprovedWidgetModel model = getWidgetModel(module, moduleItem);

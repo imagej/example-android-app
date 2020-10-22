@@ -38,9 +38,11 @@ public class DisplayWindowsAdapter extends
     private EventService eventService;
 
     ObservableList<AndroidDisplayPanel> displayPanels;
+    private final int adapterLayout;
 
-    public DisplayWindowsAdapter(Context context) {
+    public DisplayWindowsAdapter(Context context, int adapterLayout) {
         setContext(context);
+        this.adapterLayout = adapterLayout;
         displayPanels = new ObservableArrayList<>();
         displayPanels.addOnListChangedCallback(new ObservableListCallback());
         eventService.subscribe(this);
@@ -66,7 +68,7 @@ public class DisplayWindowsAdapter extends
         android.content.Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
 
-        View windowView = inflater.inflate(R.layout.scijava_view_window, parent, false);
+        View windowView = inflater.inflate(adapterLayout, parent, false);
 
         return new ViewHolder(windowView);
     }

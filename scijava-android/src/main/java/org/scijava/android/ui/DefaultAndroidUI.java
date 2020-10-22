@@ -30,21 +30,35 @@
 
 package org.scijava.android.ui;
 
+import android.view.ViewGroup;
+
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import org.scijava.Context;
 import org.scijava.android.AndroidService;
+import org.scijava.android.R;
+import org.scijava.android.ui.widget.ModuleInputsAdapter;
 import org.scijava.app.AppService;
 import org.scijava.display.Display;
+import org.scijava.event.EventHandler;
 import org.scijava.event.EventService;
 import org.scijava.log.LogService;
 import org.scijava.menu.MenuService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.plugin.PluginInfo;
+import org.scijava.plugin.PluginService;
 import org.scijava.thread.ThreadService;
 import org.scijava.ui.AbstractUserInterface;
 import org.scijava.ui.DialogPrompt;
 import org.scijava.ui.SystemClipboard;
 import org.scijava.ui.UIService;
 import org.scijava.ui.UserInterface;
+import org.scijava.ui.viewer.DisplayViewer;
 import org.scijava.ui.viewer.DisplayWindow;
+
+import java.util.List;
 
 /**
  * Implementation for Android-based user interfaces.
@@ -76,11 +90,16 @@ public class DefaultAndroidUI extends AbstractUserInterface implements
 	@Parameter
 	private AndroidService androidService;
 
+	@Parameter
+	private Context context;
+
 	private AndroidApplicationFrame appFrame;
 	private AndroidToolBar toolBar;
 	private AndroidStatusBar statusBar;
 	private AndroidConsolePane consolePane;
 	private AndroidClipboard systemClipboard;
+
+	private DisplayWindowsAdapter adapter;
 
 	// -- UserInterface methods --
 
@@ -111,7 +130,7 @@ public class DefaultAndroidUI extends AbstractUserInterface implements
 
 	@Override
 	public DisplayWindow createDisplayWindow(Display<?> display) {
-		return new AndroidDisplayWindow(androidService.getActivity());
+		return new AndroidDisplayWindow(display, adapter);
 	}
 
 	@Override
@@ -127,7 +146,14 @@ public class DefaultAndroidUI extends AbstractUserInterface implements
 
 	@Override
 	public boolean requiresEDT() {
-		// TODO
-		return false;
+		return true;
+	}
+
+	@EventHandler
+	private void initAdapter(final org.scijava.ui.event.UIShownEvent e) {
+		ViewGroup view = androidService.getActivity().findViewById(R.id.scijava_view);
+		RecyclerView rv = view.findViewById(R.id.scijava_view_rw);
+		adapter = new DisplayWindowsAdapter(getContext());
+		rv.setAdapter(adapter);
 	}
 }

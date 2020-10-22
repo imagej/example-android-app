@@ -61,5 +61,4 @@ public class AndroidTextDisplayViewer extends AbstractTextDisplayViewer {
 		super.view(w, d);
 		setPanel(new AndroidTextDisplayPanel(getDisplay(), w, androidService.getActivity()));
 	}
-
 }

@@ -1,13 +1,16 @@
 package org.scijava.android.ui.viewer.text;
 
 import android.app.Activity;
+import android.graphics.Typeface;
 import android.text.Html;
 import android.util.TypedValue;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.google.android.material.textview.MaterialTextView;
+
 import org.scijava.android.R;
+import org.scijava.android.ui.viewer.AndroidDisplayPanel;
 import org.scijava.display.TextDisplay;
 import org.scijava.ui.viewer.DisplayWindow;
 import org.scijava.ui.viewer.text.TextDisplayPanel;
@@ -19,10 +22,10 @@ public class AndroidTextDisplayPanel implements TextDisplayPanel, AndroidDisplay
 	private final TextView panel;
 
 	public AndroidTextDisplayPanel(TextDisplay display, DisplayWindow window, Activity activity) {
-		ViewGroup root = activity.findViewById(R.id.scijava_view);
-		panel = (TextView) activity.getLayoutInflater().inflate(R.layout.scijava_panel_text, root, false);
+		panel = new MaterialTextView(activity, null, R.style.Widget_SciJava_Panel_Text);
 		panel.setAutoSizeTextTypeUniformWithConfiguration(
-                1, 100, 1, TypedValue.COMPLEX_UNIT_PX);
+				1, 100, 1, TypedValue.COMPLEX_UNIT_PX);
+		panel.setTypeface(Typeface.MONOSPACE);
 		display.getContext().inject(this);
 		this.display = display;
 		this.window = window;

@@ -60,7 +60,7 @@ public class AndroidImageJGateway extends AndroidSciJavaGateway {
 	 */
 	public AndroidImageJGateway(final Context context, Activity activity) {
 		super(context, activity);
-		activity.setTheme(R.style.SplashTheme);
+		activity.setTheme(R.style.Theme_ImageJ_Default);
 	}
 
 	@Override

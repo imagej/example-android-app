@@ -1,4 +1,4 @@
-package org.scijava.android.ui.viewer.text;
+package org.scijava.android.ui.viewer;
 
 import android.view.View;
 

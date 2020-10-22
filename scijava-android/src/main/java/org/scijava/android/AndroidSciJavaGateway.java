@@ -32,18 +32,11 @@
 package org.scijava.android;
 
 import android.app.Activity;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ListAdapter;
-import android.widget.ListView;
-
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import org.scijava.AbstractGateway;
 import org.scijava.Context;
 import org.scijava.Gateway;
-import org.scijava.android.AndroidService;
+import org.scijava.android.ui.DisplayWindowsAdapter;
 import org.scijava.app.App;
 import org.scijava.app.AppService;
 import org.scijava.plugin.Plugin;
@@ -79,16 +72,6 @@ public class AndroidSciJavaGateway extends AbstractGateway {
 
 		get(AndroidService.class).setActivity(activity);
 
-
-//		RecyclerView controlView = activity.findViewById(R.id.scijava_control);
-//		if(controlView != null) {
-//			controlView.setLayoutManager(new LinearLayoutManager(activity));
-//		}
-
-//		// make view and control list scale item to full width if only one item is present
-//		setSingleItemFullWidth(activity.findViewById(R.id.scijava_view));
-//		setSingleItemFullWidth(activity.findViewById(R.id.scijava_control));
-
 		// fixes NPE caused by not implemented Class::getProtectionDomain() method on Android
 		// called from AppUtils::getBaseDirectory
 		Map<String, App> apps = get(AppService.class).getApps();
@@ -97,19 +80,9 @@ public class AndroidSciJavaGateway extends AbstractGateway {
 		});
 	}
 
-	public static void setSingleItemFullWidth(ListView listView) {
-		ListAdapter listAdapter = listView.getAdapter();
-		if (listAdapter != null) {
-			if(listAdapter.getCount() == 1) {
-				View onlyChild = listView.getChildAt(0);
-				ViewGroup.LayoutParams params = onlyChild.getLayoutParams();
-				params.width = ViewGroup.LayoutParams.MATCH_PARENT;
-				onlyChild.setLayoutParams(params);
-				onlyChild.requestLayout();
-				listView.requestLayout();
-			}
-		}
-
+	@Override
+	public void launch(String... args) {
+		super.launch(args);
 	}
 
 	@Override

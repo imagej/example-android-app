@@ -2,11 +2,10 @@ package net.imagej.android.ui.viewer.image;
 
 import android.app.Activity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import org.scijava.android.R;
-import org.scijava.android.ui.viewer.text.AndroidDisplayPanel;
+import net.imagej.android.R;
+import org.scijava.android.ui.viewer.AndroidDisplayPanel;
 import org.scijava.ui.viewer.DisplayWindow;
 
 public class AndroidRandomAccessibleDisplayPanel implements RandomAccessibleIntervalDisplayPanel, AndroidDisplayPanel {
@@ -17,8 +16,7 @@ public class AndroidRandomAccessibleDisplayPanel implements RandomAccessibleInte
 
 	public AndroidRandomAccessibleDisplayPanel(AndroidRandomAccessibleIntervalDisplay display, DisplayWindow window, Activity activity) {
 		this.display = display;
-		ViewGroup root = activity.findViewById(R.id.scijava_view);
-		content = (ImageView) activity.getLayoutInflater().inflate(net.imagej.android.R.layout.imagej_panel_image, root, false);
+		content = new ImageView(activity);
 		display.getContext().inject(this);
 		this.window = window;
 		window.setContent(this);

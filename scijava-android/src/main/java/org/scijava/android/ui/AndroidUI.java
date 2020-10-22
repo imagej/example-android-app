@@ -37,6 +37,6 @@ package org.scijava.android.ui;
  */
 public interface AndroidUI {
 
-	public static final String NAME = "android";
+	String NAME = "android";
 
 }

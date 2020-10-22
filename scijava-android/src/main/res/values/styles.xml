@@ -1,26 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="scijava_default" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+    <style name="Theme.SciJava.Default" parent="Theme.MaterialComponents.DayNight.NoActionBar">
     </style>
 
-    <style name="scijava_view_window" parent="CardView">
+    <style name="Widget.SciJava.Window" parent="CardView">
         <item name="android:layout_gravity">center</item>
         <item name="android:layout_width">200dp</item>
         <item name="android:layout_height">match_parent</item>
         <item name="cardCornerRadius">4dp</item>
         <item name="android:layout_margin">@dimen/margin</item>
     </style>
-    <style name="scijava_control_window" parent="scijava_view_window">
+    <style name="Widget.SciJava.Window.Control" parent="Widget.SciJava.Window">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_weight">1</item>
         <item name="android:minWidth">200dp</item>
     </style>
 
-    <style name="scijava_input_widget">
-        <item name="android:layout_width">match_parent</item>
+    <style name="Widget.SciJava.Panel.Text" parent="Widget.MaterialComponents.TextView">
+        <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
+        <item name="singleLine">false</item>
+        <item name="android:typeface">monospace</item>
+        <item name="autoSizeTextType">uniform</item>
     </style>
-
-    <style name="scijava_input_panel"></style>
 </resources>

@@ -66,7 +66,7 @@ public class AndroidRandomAccessibleIntervalDisplayViewer extends AbstractDispla
 	@Override
 	public void view(final DisplayWindow w, final Display<?> d) {
 		super.view(w, d);
-		setPanel(new AndroidRandomAccessibleDisplayPanel(getDisplay(), w, androidService.getActivity()));
+		setPanel(new AndroidRandomAccessibleDisplayPanel(androidService.getActivity(), getDisplay(), w));
 	}
 
 	@Override

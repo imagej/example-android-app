@@ -36,7 +36,6 @@ import android.app.Activity;
 import org.scijava.AbstractGateway;
 import org.scijava.Context;
 import org.scijava.Gateway;
-import org.scijava.android.ui.DisplayWindowsAdapter;
 import org.scijava.app.App;
 import org.scijava.app.AppService;
 import org.scijava.plugin.Plugin;
@@ -50,14 +49,14 @@ import java.util.Map;
  * @author Deborah Schmidt
  */
 @Plugin(type = Gateway.class)
-public class AndroidSciJavaGateway extends AbstractGateway {
+public class AndroidGateway extends AbstractGateway {
 
 	private static final String NAME = "SciJava-Android";
 
 	/**
 	 * Creates a new SciJava Android application context.
 	 */
-	public AndroidSciJavaGateway(Activity activity) {
+	public AndroidGateway(Activity activity) {
 		this(new Context(SciJavaService.class, AndroidService.class), activity);
 	}
 
@@ -67,7 +66,7 @@ public class AndroidSciJavaGateway extends AbstractGateway {
 	 * 
 	 * @see Context
 	 */
-	public AndroidSciJavaGateway(final Context context, Activity activity) {
+	public AndroidGateway(final Context context, Activity activity) {
 		super(NAME, context);
 
 		get(AndroidService.class).setActivity(activity);

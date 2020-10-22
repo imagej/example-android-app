@@ -151,9 +151,11 @@ public class DefaultAndroidUI extends AbstractUserInterface implements
 
 	@EventHandler
 	private void initAdapter(final org.scijava.ui.event.UIShownEvent e) {
-		ViewGroup view = androidService.getActivity().findViewById(R.id.scijava_view);
-		RecyclerView rv = view.findViewById(R.id.scijava_view_rw);
-		adapter = new DisplayWindowsAdapter(getContext());
-		rv.setAdapter(adapter);
+		threadService.queue(() -> {
+			ViewGroup view = androidService.getActivity().findViewById(R.id.scijava_view);
+			RecyclerView rv = view.findViewById(R.id.scijava_view_rw);
+			adapter = new DisplayWindowsAdapter(getContext());
+			rv.setAdapter(adapter);
+		});
 	}
 }

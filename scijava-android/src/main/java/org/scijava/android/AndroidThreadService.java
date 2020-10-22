@@ -55,7 +55,7 @@ import java.util.concurrent.ThreadFactory;
  * @author Deborah Schmidt
  */
 @Plugin(type = Service.class, priority = Priority.HIGH)
-public class SciJavaAndroidThreadService extends AbstractService implements
+public class AndroidThreadService extends AbstractService implements
 		ThreadService
 {
 
@@ -66,6 +66,9 @@ public class SciJavaAndroidThreadService extends AbstractService implements
 
 	@Parameter
 	private LogService log;
+
+	@Parameter
+	private AndroidService androidService;
 
 	private ExecutorService executor;
 
@@ -108,21 +111,13 @@ public class SciJavaAndroidThreadService extends AbstractService implements
 	@Override
 	public void invoke(final Runnable code) throws InterruptedException
 	{
-		if (isDispatchThread()) {
-			// just call the code
-			code.run();
-		}
-		else {
-			// invoke on the EDT
-			Handler handler = new Handler(Looper.getMainLooper());
-			SynchronousHandler.postAndWait(handler, wrap(code));
-		}
+		androidService.getActivity().runOnUiThread(code);
 	}
 
 	@Override
 	public void queue(final Runnable code) {
 		Handler handler = new Handler(Looper.getMainLooper());
-		handler.post(wrap(code));
+		handler.post(code);
 	}
 
 	@Override

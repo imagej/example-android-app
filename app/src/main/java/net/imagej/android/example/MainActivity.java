@@ -15,32 +15,34 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import net.imagej.android.ImgLibUtils;
 import net.imagej.example.R;
+import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.view.Views;
 
-import org.scijava.android.AndroidSciJavaGateway;
-import org.scijava.command.CommandService;
+import org.scijava.android.AndroidGateway;
 
 public class MainActivity extends AppCompatActivity {
 
-    private CommandService commandService;
-    private RandomAccessibleInterval<ARGBType> img;
+    private ViewGroup sciJavaView;
     private LinearLayout mainView;
+
+    private AndroidGateway gateway;
+
     private ASCIICommand asciiCommand;
+
     private CameraHandler cameraHandler;
-    private ViewGroup scijavaView;
-    private AndroidSciJavaGateway gateway;
+    private RandomAccessibleInterval<ARGBType> img;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupBaseLayout();
+
+        launchGateway();
+
         setupCamera();
-        initGatewayAndServices();
-        initResultImage();
-        launchAsciiCommand();
         setupTakePictureButton();
         setupShareButton();
     }
@@ -54,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_view);
         mainView = findViewById(R.id.main_content);
-        scijavaView = findViewById(R.id.scijava_group);
+        sciJavaView = findViewById(R.id.scijava_group);
     }
 
     @Override
@@ -69,21 +71,15 @@ public class MainActivity extends AppCompatActivity {
         cameraHandler.onRequestPermissionResult(requestCode, permissions, grantResults);
     }
 
-    private void initGatewayAndServices() {
-
-        gateway = new AndroidSciJavaGateway(new org.scijava.Context(), this);
+    private void launchGateway() {
+        gateway = new AndroidGateway(new org.scijava.Context(), this);
         gateway.launch();
-        commandService = gateway.get(CommandService.class);
-    }
-
-    private void initResultImage() {
-        img = new ArrayImgFactory<>(new ARGBType()).create(CameraPreview.preferredWidth, CameraPreview.preferredHeight);
     }
 
     private void launchAsciiCommand() {
         asciiCommand = new ASCIICommand();
-        commandService.context().inject(asciiCommand);
-        commandService.moduleService().run(asciiCommand, true, "input", img);
+        gateway.context().inject(asciiCommand);
+        gateway.module().run(asciiCommand, true, "input", img);
     }
 
     @Override
@@ -99,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
         }
         setAlignView(mainView, align);
         setLayoutParams(cameraHandler.getPreviewView(), align);
-        setLayoutParams(scijavaView, align);
+        setLayoutParams(sciJavaView, align);
     }
 
     private void setAlignView(LinearLayout view, int alignment) {
@@ -124,19 +120,27 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 cameraHandler.takePicture(this::pictureTaken);
             }
-
             private void pictureTaken(byte[] bytes, Camera camera) {
-                if(bytes == null) {
-                    camera.startPreview();
-                    return;
-                }
-                img = new ArrayImgFactory<>(new ARGBType()).create(camera.getParameters().getPictureSize().width, camera.getParameters().getPictureSize().height);
-                ImgLibUtils.cameraBytesToImage(bytes, img);
-                img = Views.rotate(img, 0, 1);
-                asciiCommand.setInput("input", img);
-                camera.startPreview();
+                updateCameraImage(bytes, camera);
             }
         });
+    }
+
+    private void updateCameraImage(byte[] bytes, Camera camera) {
+        camera.startPreview();
+        if(bytes != null) {
+            gateway.thread().run(() -> {
+                makeImage(bytes, camera.getParameters().getPictureSize());
+                if(asciiCommand == null) launchAsciiCommand();
+                asciiCommand.setInput("input", img);
+            });
+        }
+    }
+
+    private void makeImage(byte[] bytes, Camera.Size size) {
+        img = new ArrayImgFactory<>(new ARGBType()).create(size.width, size.height);
+        ImgLibUtils.cameraBytesToImage(bytes, img);
+        img = Views.zeroMin(Views.rotate(img, 0, 1));
     }
 
     private void setupShareButton() {

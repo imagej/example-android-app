@@ -49,6 +49,7 @@ import org.scijava.display.Display;
 import org.scijava.plugin.Plugin;
 
 import java.util.ArrayList;
+import java.util.WeakHashMap;
 
 /**
  * Default display for text.
@@ -60,11 +61,9 @@ public class AndroidRandomAccessibleIntervalDisplay extends AbstractDisplay<Rand
 	RandomAccessibleIntervalDisplay
 {
 
-
 	public AndroidRandomAccessibleIntervalDisplay() {
 		super(RandomAccessibleInterval.class);
 	}
-
 
 	@Override
 	public RandomAccessibleInterval getActiveRAI() {
@@ -76,45 +75,4 @@ public class AndroidRandomAccessibleIntervalDisplay extends AbstractDisplay<Rand
 		return false;
 	}
 
-	Bitmap getBitmap() {
-		return toBufferedImage(getActiveRAI());
-	}
-
-
-	private <T extends RealType<T>> Bitmap toBufferedImage(RandomAccessibleInterval<T> img) {
-		for (int i = 2; i < img.numDimensions(); i++) {
-			img = Views.hyperSlice(img, i, 0);
-		}
-		long width = img.dimension(0);
-		long height = img.dimension(1);
-		RandomAccessibleInterval<ARGBType> screenImage = new ArrayImgFactory<>(new ARGBType()).create(width, height);
-		T min = img.randomAccess().get().copy();
-		T max = img.randomAccess().get().copy();
-		ComputeMinMax<T> minMax = new ComputeMinMax<>(Views.iterable(img), min, max);
-		minMax.process();
-		RealLUTConverter<? extends RealType<?>> converter = new RealLUTConverter<>(min.getRealDouble(),
-				max.getRealDouble(), ColorTables.GRAYS);
-		ArrayList<RealLUTConverter<? extends RealType<?>>> converters = new ArrayList<>();
-		converters.add(converter);
-		CompositeXYProjector projector;
-		if (AbstractCellImg.class.isAssignableFrom(img.getClass())) {
-			projector =
-					new SourceOptimizedCompositeXYProjector(img,
-							screenImage, converters, -1);
-		}
-		else {
-			projector =
-					new CompositeXYProjector(img, Views.iterable(screenImage),
-							converters, -1);
-		}
-		projector.setComposite(false);
-		projector.map();
-		Bitmap bitmap = Bitmap.createBitmap((int) width, (int) height, Bitmap.Config.RGBA_F16, true);
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
-				bitmap.setPixel(x, y, screenImage.getAt(x, y).get());
-			}
-		}
-		return bitmap;
-	}
 }

@@ -35,7 +35,7 @@ import android.app.Activity;
 
 import org.scijava.Context;
 import org.scijava.Gateway;
-import org.scijava.android.AndroidSciJavaGateway;
+import org.scijava.android.AndroidGateway;
 import org.scijava.plugin.Plugin;
 
 /**
@@ -44,7 +44,7 @@ import org.scijava.plugin.Plugin;
  * @author Deborah Schmidt
  */
 @Plugin(type = Gateway.class)
-public class AndroidImageJGateway extends AndroidSciJavaGateway {
+public class AndroidImageJGateway extends AndroidGateway {
 
 	/**
 	 * Creates a new ImageJ Android application context.

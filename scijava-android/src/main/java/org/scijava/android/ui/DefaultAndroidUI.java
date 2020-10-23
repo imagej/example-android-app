@@ -30,13 +30,6 @@
 
 package org.scijava.android.ui;
 
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ViewSwitcher;
-
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-
 import org.scijava.Context;
 import org.scijava.android.AndroidService;
 import org.scijava.android.R;
@@ -154,33 +147,9 @@ public class DefaultAndroidUI extends AbstractUserInterface implements
 	@EventHandler
 	private void initAdapters(final org.scijava.ui.event.UIShownEvent e) {
 		threadService.queue(() -> {
-			viewAdapter = initAdapter(R.id.scijava_view, R.id.scijava_view_rw, R.layout.scijava_view_window);
-			controlAdapter = initAdapter(R.id.scijava_control, R.id.scijava_control_rw, R.layout.scijava_control_window);
+			viewAdapter = WindowRecycleViewBuilder.build(androidService, getContext(), R.id.scijava_view, R.layout.scijava_view_window);
+			controlAdapter = WindowRecycleViewBuilder.build(androidService, getContext(), R.id.scijava_control, R.layout.scijava_control_window);
 		});
 	}
 
-	private DisplayWindowsAdapter initAdapter(int parentId, int recyclerId, int adapterLayoutId) {
-		ViewGroup view = androidService.getActivity().findViewById(parentId);
-		RecyclerView rv = view.findViewById(recyclerId);
-		DisplayWindowsAdapter adapter = new DisplayWindowsAdapter(getContext(), adapterLayoutId);
-		rv.setAdapter(adapter);
-		ViewSwitcher switcher = view.findViewById(R.id.switcher);
-		if(switcher != null) {
-			adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-				@Override
-				public void onItemRangeInserted(int positionStart, int itemCount) {
-					super.onItemRangeInserted(positionStart, itemCount);
-					if(adapter.getItemCount() == 1) switcher.showNext();
-					rv.scrollToPosition(adapter.getItemCount() - 1);
-				}
-
-				@Override
-				public void onItemRangeRemoved(int positionStart, int itemCount) {
-					super.onItemRangeRemoved(positionStart, itemCount);
-					if(adapter.getItemCount() == 0) switcher.showPrevious();
-				}
-			});
-		}
-		return adapter;
-	}
 }

@@ -3,10 +3,10 @@ package org.scijava.android.ui;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.databinding.ObservableArrayList;
 import androidx.databinding.ObservableList;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,21 +19,13 @@ import org.scijava.display.Display;
 import org.scijava.display.event.DisplayDeletedEvent;
 import org.scijava.event.EventHandler;
 import org.scijava.event.EventService;
-import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
-import org.scijava.ui.UIService;
 
 public class DisplayWindowsAdapter extends
     RecyclerView.Adapter<DisplayWindowsAdapter.ViewHolder> implements Contextual {
 
     @Parameter
-    private LogService log;
-
-    @Parameter
     private Context context;
-
-    @Parameter
-    private UIService uiService;
 
     @Parameter
     private EventService eventService;
@@ -64,6 +56,7 @@ public class DisplayWindowsAdapter extends
         return context;
     }
 
+    @NonNull
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         android.content.Context context = parent.getContext();
@@ -76,23 +69,21 @@ public class DisplayWindowsAdapter extends
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        // Get the data model based on position
         AndroidDisplayPanel input = displayPanels.get(position);
 
-        // Set item views based on your views and data model
         TextView textView = holder.nameTextView;
         textView.setText(input.getDisplay().getName());
+
+        // this is not great - this is replacing the display content with a already generated view, but it should do that probably based on the data
         FrameLayout content = holder.contentView;
         if(content.getChildCount() > 0) {
             content.removeAllViews();
-            ViewGroup parent = (ViewGroup) input.getPanel().getParent();
-            if(parent != null) {
-                parent.removeView(input.getPanel());
-            }
-            content.addView(input.getPanel());
-        } else {
-            content.addView(input.getPanel());
         }
+        ViewGroup parent = (ViewGroup) input.getPanel().getParent();
+        if(parent != null) {
+            parent.removeView(input.getPanel());
+        }
+        content.addView(input.getPanel());
     }
 
     @Override
@@ -108,7 +99,6 @@ public class DisplayWindowsAdapter extends
     private void addPanel(AndroidDisplayPanel panel) {
         for (AndroidDisplayPanel p : displayPanels) {
             if(p.equals(panel)) {
-                // already visible
                 return;
             }
         }
@@ -131,6 +121,11 @@ public class DisplayWindowsAdapter extends
                 return;
             }
         }
+    }
+
+    public void removePanel(int position) {
+        displayPanels.remove(position);
+        notifyItemRemoved(position);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

@@ -82,7 +82,6 @@ public class AndroidTextDisplayPanel implements TextDisplayPanel, AndroidDisplay
 			panel.setText(text);
 			long lineCount = text.chars().filter(ch -> ch == '\n').count()+1;
 			panel.setMaxLines((int) lineCount);
-
 		}
 		redoLayout();
 	}

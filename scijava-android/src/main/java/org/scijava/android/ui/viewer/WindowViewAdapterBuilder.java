@@ -1,4 +1,4 @@
-package org.scijava.android.ui;
+package org.scijava.android.ui.viewer;
 
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,19 +12,22 @@ import org.scijava.Context;
 import org.scijava.android.AndroidService;
 import org.scijava.android.R;
 
-class WindowRecycleViewBuilder {
+/*
+ * Helper class to create a row of scrollable windows which can be deleted by swiping them up
+ */
+public class WindowViewAdapterBuilder {
 
-    static DisplayWindowsAdapter build(AndroidService androidService, Context context, int parentId, int adapterLayoutId) {
+    public static ViewAdapter<AndroidDisplayPanel<?>> build(AndroidService androidService, Context context, int parentId, int adapterLayoutId) {
         ViewGroup view = androidService.getActivity().findViewById(parentId);
         RecyclerView rv = view.findViewById(R.id.recyclerview);
-        DisplayWindowsAdapter adapter = new DisplayWindowsAdapter(context, adapterLayoutId);
+        ViewAdapter<AndroidDisplayPanel<?>> adapter = new ViewAdapter<>(context, adapterLayoutId);
         initSwitcher(view, rv, adapter);
         initSwipeDelete(rv, adapter);
         rv.setAdapter(adapter);
         return adapter;
     }
 
-    private static void initSwitcher(ViewGroup view, RecyclerView rv, DisplayWindowsAdapter adapter) {
+    private static void initSwitcher(ViewGroup view, RecyclerView rv, ViewAdapter<AndroidDisplayPanel<?>> adapter) {
         ViewSwitcher switcher = view.findViewById(R.id.switcher);
         if(switcher != null) {
             View emptyView = switcher.getCurrentView();
@@ -47,16 +50,16 @@ class WindowRecycleViewBuilder {
         }
     }
 
-    private static void initSwipeDelete(RecyclerView rv, DisplayWindowsAdapter adapter) {
+    private static void initSwipeDelete(RecyclerView rv, ViewAdapter<AndroidDisplayPanel<?>> adapter) {
         ItemTouchHelper itemTouchHelper = new
                 ItemTouchHelper(new SwipeToDeleteCallback(adapter));
         itemTouchHelper.attachToRecyclerView(rv);
     }
 
     static class SwipeToDeleteCallback extends ItemTouchHelper.SimpleCallback {
-        private final DisplayWindowsAdapter adapter;
+        private final ViewAdapter<AndroidDisplayPanel<?>> adapter;
 
-        public SwipeToDeleteCallback(DisplayWindowsAdapter adapter) {
+        public SwipeToDeleteCallback(ViewAdapter<AndroidDisplayPanel<?>> adapter) {
             super(0, ItemTouchHelper.UP);
             this.adapter = adapter;
         }
@@ -69,7 +72,7 @@ class WindowRecycleViewBuilder {
         @Override
         public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
             int position = viewHolder.getAdapterPosition();
-            adapter.removePanel(position);
+            adapter.removeItem(position);
         }
 
     }

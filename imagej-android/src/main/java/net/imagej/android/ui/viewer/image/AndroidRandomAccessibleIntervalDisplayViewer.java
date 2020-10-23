@@ -50,9 +50,6 @@ import org.scijava.ui.viewer.DisplayWindow;
 @Plugin(type = DisplayViewer.class)
 public class AndroidRandomAccessibleIntervalDisplayViewer extends AbstractDisplayViewer<RandomAccessibleInterval> {
 
-	@Parameter
-	private AndroidService androidService;
-
 	@Override
 	public boolean isCompatible(final UserInterface ui) {
 		return ui instanceof AndroidUI;
@@ -66,7 +63,7 @@ public class AndroidRandomAccessibleIntervalDisplayViewer extends AbstractDispla
 	@Override
 	public void view(final DisplayWindow w, final Display<?> d) {
 		super.view(w, d);
-		setPanel(new AndroidRandomAccessibleDisplayPanel(androidService.getActivity(), getDisplay(), w));
+		setPanel(new AndroidRandomAccessibleDisplayPanel(getDisplay(), w));
 	}
 
 	@Override

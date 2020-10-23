@@ -29,54 +29,58 @@
 
 package org.scijava.android.ui.widget;
 
-import android.app.AlertDialog;
-import android.view.ViewGroup;
-import android.widget.TextView;
+import android.view.View;
 
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.scijava.AbstractContextual;
-import org.scijava.android.AndroidService;
-import org.scijava.android.R;
+import org.scijava.android.ui.AndroidUI;
+import org.scijava.android.ui.viewer.module.DefaultModuleDisplay;
+import org.scijava.display.Display;
 import org.scijava.module.Module;
 import org.scijava.module.process.PreprocessorPlugin;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.thread.ThreadService;
+import org.scijava.ui.AbstractInputHarvesterPlugin;
 import org.scijava.ui.UIService;
+import org.scijava.ui.viewer.DisplayWindow;
 import org.scijava.widget.InputHarvester;
+import org.scijava.widget.InputPanel;
 
 
 @Plugin(type = PreprocessorPlugin.class, priority = InputHarvester.PRIORITY)
-public class AndroidInputHarvester extends AbstractContextual implements PreprocessorPlugin {
-
+public class AndroidInputHarvester extends AbstractInputHarvesterPlugin<RecyclerView, View> {
 	@Parameter
-	private AndroidService androidService;
+	private UIService uiService;
 
 	@Parameter
 	private ThreadService threadService;
 
-	@Parameter
-	private UIService uiService;
-
 	@Override
-	public void process(Module module) {
-		uiService.show(module.getInfo().getTitle(), module);
+	public InputPanel<RecyclerView, View> createInputPanel() {
+		return new AndroidInputPanel(getContext());
 	}
 
 	@Override
-	public boolean isCanceled() {
-		return false;
+	public boolean harvestInputs(final InputPanel<RecyclerView, View> inputPanel,
+								 final Module module)
+	{
+		// FIXME with the current implementation there is no synchronous input harvesting
+		//  input parameters will be displayed, but will only work for InteractiveCommands
+		threadService.queue(() -> {
+			AndroidInputPanel panel = (AndroidInputPanel) inputPanel;
+			Display<Module> display = new DefaultModuleDisplay(module, panel);
+			DisplayWindow window = uiService.getDefaultUI().createDisplayWindow(display);
+			window.setContent(panel);
+			window.showDisplay(true);
+		});
+		return true;
 	}
 
-	@Override
-	public void cancel(String reason) {
-
-	}
+	// -- Internal methods --
 
 	@Override
-	public String getCancelReason() {
-		return null;
+	protected String getUI() {
+		return AndroidUI.NAME;
 	}
 }

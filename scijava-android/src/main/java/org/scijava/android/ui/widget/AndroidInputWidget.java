@@ -31,37 +31,45 @@
 package org.scijava.android.ui.widget;
 
 import android.view.View;
-import android.view.ViewGroup;
-
-import androidx.recyclerview.widget.RecyclerView;
 
 import org.scijava.android.ui.AndroidUI;
+import org.scijava.android.ui.viewer.AndroidDataView;
 import org.scijava.ui.AbstractUIInputWidget;
 import org.scijava.ui.UserInterface;
 
 /**
  * Common superclass for Android-based input widgets.
- * 
+ *
+ * @param <T> The input type of the widget.
+ * @param <W> The type of UI component housing the widget.
+ *
  * @author Deborah Schmidt
  */
-public abstract class AndroidInputWidget<T> extends
-	AbstractUIInputWidget<T, AndroidInputWidget>
-{
-	@Override
-	public Class<AndroidInputWidget> getComponentType() {
-		return AndroidInputWidget.class;
-	}
-
-	// -- AbstractUIInputWidget methods --
+public abstract class AndroidInputWidget<T, W extends View> extends
+	AbstractUIInputWidget<T, View> implements AndroidDataView<W> {
 
 	@Override
 	protected UserInterface ui() {
 		return ui(AndroidUI.NAME);
 	}
 
-	public abstract RecyclerView.ViewHolder createViewHolder(ViewGroup itemView);
+	@Override
+	public Class<View> getComponentType() {
+		return View.class;
+	}
 
-	public abstract View createView(ViewGroup parent);
+	@Override
+	public boolean isLabeled() {
+		return super.isLabeled();
+	}
 
-	public abstract void setValue()
+	@Override
+	public String getLabel() {
+		return get().getWidgetLabel();
+	}
+
+	@Override
+	public void update() {
+		refreshWidget();
+	}
 }

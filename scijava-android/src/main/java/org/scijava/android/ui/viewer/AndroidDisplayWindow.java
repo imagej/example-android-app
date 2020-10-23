@@ -27,9 +27,12 @@
  * #L%
  */
 
-package org.scijava.android.ui;
+package org.scijava.android.ui.viewer;
+
+import android.view.View;
 
 import org.scijava.android.ui.viewer.AndroidDisplayPanel;
+import org.scijava.android.ui.viewer.ViewAdapter;
 import org.scijava.display.Display;
 import org.scijava.display.event.DisplayUpdatedEvent;
 import org.scijava.event.EventHandler;
@@ -41,14 +44,14 @@ import org.scijava.ui.viewer.DisplayWindow;
  *
  * @author Deborah Schmidt
  */
-public class AndroidDisplayWindow implements DisplayWindow {
+public class AndroidDisplayWindow<T, W extends View> implements DisplayWindow {
 
-	private final Display<?> display;
-	private final DisplayWindowsAdapter adapter;
+	private final Display<T> display;
+	private final ViewAdapter<AndroidDisplayPanel<W>> adapter;
 	private String title;
-	private AndroidDisplayPanel panel;
+	private AndroidDisplayPanel<W> panel;
 
-	public AndroidDisplayWindow(Display<?> display, DisplayWindowsAdapter adapter) {
+	public AndroidDisplayWindow(Display<T> display, ViewAdapter<AndroidDisplayPanel<W>> adapter) {
 		this.display = display;
 		this.adapter = adapter;
 	}
@@ -62,7 +65,7 @@ public class AndroidDisplayWindow implements DisplayWindow {
 
 	@Override
 	public void setContent(final DisplayPanel panel) {
-		this.panel = (AndroidDisplayPanel)panel;
+		this.panel = (AndroidDisplayPanel<W>)panel;
 	}
 
 	@Override
@@ -71,7 +74,7 @@ public class AndroidDisplayWindow implements DisplayWindow {
 
 	@Override
 	public void showDisplay(final boolean visible) {
-		adapter.showPanel(panel, visible);
+		adapter.showItem(panel, visible);
 	}
 
 	@Override
@@ -81,7 +84,7 @@ public class AndroidDisplayWindow implements DisplayWindow {
 
 	@Override
 	public void close() {
-		adapter.showPanel(panel, false);
+		adapter.showItem(panel, false);
 	}
 
 	@Override

@@ -29,24 +29,17 @@
 
 package org.scijava.android.ui.viewer.module;
 
-import org.scijava.Priority;
+import org.scijava.android.ui.widget.AndroidInputPanel;
 import org.scijava.display.AbstractDisplay;
-import org.scijava.display.Display;
 import org.scijava.module.Module;
-import org.scijava.plugin.Plugin;
 
-/**
- * Default display for modules.
- * 
- * @author Deborah Schmidt
- */
-@Plugin(type = Display.class, priority = Priority.LOW)
 public class DefaultModuleDisplay extends AbstractDisplay<Module> implements
 	ModuleDisplay
 {
 
-	public DefaultModuleDisplay() {
+	public DefaultModuleDisplay(Module module, AndroidInputPanel inputPanel) {
 		super(Module.class);
+		inputPanel.setDisplay(this);
 	}
 
 }

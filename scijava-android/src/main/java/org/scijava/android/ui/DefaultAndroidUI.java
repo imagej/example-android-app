@@ -33,6 +33,10 @@ package org.scijava.android.ui;
 import org.scijava.Context;
 import org.scijava.android.AndroidService;
 import org.scijava.android.R;
+import org.scijava.android.ui.viewer.AndroidDisplayPanel;
+import org.scijava.android.ui.viewer.AndroidDisplayWindow;
+import org.scijava.android.ui.viewer.ViewAdapter;
+import org.scijava.android.ui.viewer.WindowViewAdapterBuilder;
 import org.scijava.android.ui.viewer.module.ModuleDisplay;
 import org.scijava.app.AppService;
 import org.scijava.display.Display;
@@ -89,8 +93,8 @@ public class DefaultAndroidUI extends AbstractUserInterface implements
 	private AndroidConsolePane consolePane;
 	private AndroidClipboard systemClipboard;
 
-	private DisplayWindowsAdapter viewAdapter;
-	private DisplayWindowsAdapter controlAdapter;
+	private ViewAdapter<AndroidDisplayPanel<?>> viewAdapter;
+	private ViewAdapter<AndroidDisplayPanel<?>> controlAdapter;
 
 	// -- UserInterface methods --
 
@@ -147,8 +151,8 @@ public class DefaultAndroidUI extends AbstractUserInterface implements
 	@EventHandler
 	private void initAdapters(final org.scijava.ui.event.UIShownEvent e) {
 		threadService.queue(() -> {
-			viewAdapter = WindowRecycleViewBuilder.build(androidService, getContext(), R.id.scijava_view, R.layout.scijava_view_window);
-			controlAdapter = WindowRecycleViewBuilder.build(androidService, getContext(), R.id.scijava_control, R.layout.scijava_control_window);
+			viewAdapter = WindowViewAdapterBuilder.build(androidService, getContext(), R.id.scijava_view, R.layout.scijava_view_window);
+			controlAdapter = WindowViewAdapterBuilder.build(androidService, getContext(), R.id.scijava_control, R.layout.scijava_control_window);
 		});
 	}
 

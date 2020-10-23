@@ -32,10 +32,12 @@ package org.scijava.android.ui.widget;
 
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+
 import org.scijava.android.AndroidService;
+import org.scijava.android.ui.viewer.AndroidViewHolder;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import org.scijava.widget.Button;
 import org.scijava.widget.ButtonWidget;
 import org.scijava.widget.InputWidget;
 import org.scijava.widget.WidgetModel;
@@ -47,19 +49,18 @@ import org.scijava.widget.WidgetModel;
  * @author Deborah Schmidt
  */
 @Plugin(type = InputWidget.class)
-public class AndroidButtonWidget extends AndroidInputWidget<Button> implements
+public class AndroidButtonWidget extends AndroidInputWidget<org.scijava.widget.Button, Button> implements
 	ButtonWidget<View>
 {
 
 	@Parameter
 	private AndroidService androidService;
-
-	private android.widget.Button button;
+	private AndroidViewHolder<Button> holder;
 
 	// -- InputWidget methods --
 
 	@Override
-	public Button getValue() {
+	public org.scijava.widget.Button getValue() {
 		return null;
 	}
 
@@ -73,18 +74,6 @@ public class AndroidButtonWidget extends AndroidInputWidget<Button> implements
 	@Override
 	public void set(final WidgetModel model) {
 		super.set(model);
-
-		button = new android.widget.Button(androidService.getActivity());
-		button.setText(model.getWidgetLabel());
-		button.setOnClickListener((view) -> {
-
-				// call the code attached to this button
-				model.callback();
-
-//				// make sure panel owning button is refreshed in case button changed
-//				// some panel fields
-//				get().getPanel().refresh();
-		});
 	}
 
 	// -- Typed methods --
@@ -99,11 +88,39 @@ public class AndroidButtonWidget extends AndroidInputWidget<Button> implements
 	@Override
 	public void doRefresh() {
 		// maybe dialog owner changed name of button
-		button.setText(get().getWidgetLabel());
+		if(holder != null) {
+			holder.getItem().setText(get().getWidgetLabel());
+		}
 	}
 
 	@Override
 	public android.widget.Button getComponent() {
-		return button;
+		return null;
+	}
+
+	@Override
+	public Button createView(ViewGroup parent) {
+		return new android.widget.Button(androidService.getActivity());
+	}
+
+	@Override
+	public Class getWidgetType() {
+		return Button.class;
+	}
+
+	@Override
+	public void attach(AndroidViewHolder<Button> holder) {
+		this.holder = holder;
+		Button button = holder.getItem();
+		button.setText(get().getWidgetLabel());
+		button.setOnClickListener((view) -> {
+			get().callback();
+			get().getPanel().refresh();
+		});
+	}
+
+	@Override
+	public void detach(AndroidViewHolder<Button> holder) {
+		this.holder = null;
 	}
 }

@@ -28,48 +28,34 @@
  * #L%
  */
 
-package org.scijava.android.ui.viewer.module;
+package org.scijava.android.ui.viewer;
 
-import org.scijava.android.AndroidService;
-import org.scijava.android.ui.AndroidUI;
-import org.scijava.display.Display;
-import org.scijava.module.Module;
-import org.scijava.plugin.Parameter;
-import org.scijava.plugin.Plugin;
-import org.scijava.thread.ThreadService;
-import org.scijava.ui.UserInterface;
-import org.scijava.ui.viewer.AbstractDisplayViewer;
-import org.scijava.ui.viewer.DisplayViewer;
-import org.scijava.ui.viewer.DisplayWindow;
+import android.view.View;
+import android.view.ViewGroup;
 
 /**
- * An Android module display viewer
- * 
+ * Common interface for Android-based data widgets.
+ *
  * @author Deborah Schmidt
  */
-@Plugin(type = DisplayViewer.class)
-public class AndroidModuleDisplayViewer  extends AbstractDisplayViewer<Module> {
+public interface AndroidDataView<W extends View>
+{
 
-	@Parameter
-	private AndroidService androidService;
+	W createView(ViewGroup parent);
 
-	@Parameter
-	private ThreadService threadService;
+	Class<W> getWidgetType();
 
-	@Override
-	public boolean isCompatible(final UserInterface ui) {
-		return ui instanceof AndroidUI;
+	void attach(AndroidViewHolder<W> holder);
+
+	void detach(AndroidViewHolder<W> holder);
+
+	default AndroidViewHolderBuilder getViewHolderBuilder() {
+		return (parent, content) -> new AndroidViewHolder<>(parent, content, createView(content));
 	}
 
-	@Override
-	public boolean canView(Display<?> d) {
-		return d instanceof ModuleDisplay;
-	}
+	void update();
 
-	@Override
-	public void view(final DisplayWindow w, final Display<?> d) {
-		super.view(w, d);
-		setPanel(new AndroidModuleDisplayPanel((ModuleDisplay)d, w, androidService.getActivity()));
-	}
+	boolean isLabeled();
 
+	String getLabel();
 }

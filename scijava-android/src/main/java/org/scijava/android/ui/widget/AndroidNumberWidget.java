@@ -33,16 +33,13 @@ package org.scijava.android.ui.widget;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.slider.Slider;
 
 import org.scijava.android.AndroidService;
-import org.scijava.android.R;
+import org.scijava.android.ui.viewer.AndroidViewHolder;
 import org.scijava.log.LogService;
 import org.scijava.module.ModuleService;
 import org.scijava.plugin.Parameter;
@@ -52,17 +49,15 @@ import org.scijava.widget.InputWidget;
 import org.scijava.widget.NumberWidget;
 import org.scijava.widget.WidgetModel;
 
-import java.lang.reflect.InvocationTargetException;
-
 /**
  * Android implementation of number chooser widget.
- * 
+ *
  * @author Curtis Rueden
  * @author Deborah Schmidt
  */
 @Plugin(type = InputWidget.class)
-public class AndroidNumberWidget extends AndroidInputWidget<Number> implements
-		NumberWidget<View>, Slider.OnChangeListener, Slider.OnSliderTouchListener, View.OnTouchListener {
+public class AndroidNumberWidget extends AndroidInputWidget<Number, Slider> implements
+		NumberWidget<View>, Slider.OnChangeListener, Slider.OnSliderTouchListener {
 
 	@Parameter
 	private ThreadService threadService;
@@ -76,38 +71,45 @@ public class AndroidNumberWidget extends AndroidInputWidget<Number> implements
 	@Parameter
 	private AndroidService androidService;
 
-	Slider slider;
+	private Number value;
 
 	@Override
 	public Slider createView(ViewGroup parent) {
-		Slider view = new Slider(androidService.getActivity());
-		return view;
-	}
+		Slider slider = new Slider(androidService.getActivity());
+		slider.setOnTouchListener((v, event) -> {
+			int action = event.getAction();
+			switch (action)
+			{
+				case MotionEvent.ACTION_DOWN:
+					// Disallow ScrollView to intercept touch events.
+					v.getParent().requestDisallowInterceptTouchEvent(true);
+					break;
 
-	public void setView(View view) {
-		view
-		nameTextView = itemView.findViewById(R.id.input_name);
-		contentView = itemView.findViewById(R.id.input_widget);
-	}
+				case MotionEvent.ACTION_UP:
+					// Allow ScrollView to intercept touch events.
+					v.getParent().requestDisallowInterceptTouchEvent(false);
+					break;
+			}
 
-	// -- InputWidget methods --
+			// Handle Seekbar touch events.
+			v.onTouchEvent(event);
+			return false;
+		});
+		return slider;
+	}
 
 	@Override
-	public Number getValue() {
-		return slider.getValue();
+	public Class<Slider> getWidgetType() {
+		return Slider.class;
 	}
 
-	// -- WrapperPlugin methods --
-
 	@Override
-	public void set(final WidgetModel model) {
-		super.set(model);
-
-		final Number min = model.getMin();
-		final Number max = model.getMax();
-		final Number softMin = model.getSoftMin();
-		final Number softMax = model.getSoftMax();
-		final Number stepSize = model.getStepSize();
+	public void attach(AndroidViewHolder<Slider> holder) {
+		final Number min = get().getMin();
+		final Number max = get().getMax();
+		final Number softMin = get().getSoftMin();
+		final Number softMax = get().getSoftMax();
+		final Number stepSize = get().getStepSize();
 
 		if (min == null || max == null || stepSize == null) {
 			log.warn("Invalid min/max/step; cannot render slider");
@@ -120,32 +122,40 @@ public class AndroidNumberWidget extends AndroidInputWidget<Number> implements
 			log.warn("Slider span too large; max - min < 2^31 required.");
 			return;
 		}
-		final Number value = (Number) model.getValue();
-		makeSlider(min, max, value);
+		final Number value = (Number) get().getValue();
+		Slider slider = holder.getItem();
+		if(min.intValue() >= 0) {
+			slider.setValueFrom(min.floatValue());
+		}
+		if(max.intValue() >= 0) {
+			slider.setValueTo(max.floatValue());
+		}
+		slider.setValue(value.floatValue());
+		slider.addOnChangeListener(this);
+		slider.addOnSliderTouchListener(this);
+
+		refreshWidget();
 	}
 
-	private void makeSlider(Number min, Number max, Number value) {
-		try {
-			threadService.invoke(() -> {
-				slider = new Slider(androidService.getActivity());
-				if(min.intValue() >= 0) {
-					slider.setValueFrom(min.floatValue());
-				}
-				if(max.intValue() >= 0) {
-					slider.setValueTo(max.floatValue());
-				}
-				slider.setValue(value.floatValue());
-				slider.addOnChangeListener(this);
+	@Override
+	public void detach(AndroidViewHolder<Slider> holder) {
+		Slider slider = holder.getItem();
+		slider.removeOnChangeListener(this);
+		slider.removeOnSliderTouchListener(this);
+	}
 
-				slider.addOnSliderTouchListener(this);
+	// -- InputWidget methods --
 
-				slider.setOnTouchListener(this);
+	@Override
+	public Number getValue() {
+		return value;
+	}
 
-				refreshWidget();
-			});
-		} catch (InterruptedException | InvocationTargetException e) {
-			e.printStackTrace();
-		}
+	// -- WrapperPlugin methods --
+
+	@Override
+	public void set(final WidgetModel model) {
+		super.set(model);
 	}
 
 	// -- Typed methods --
@@ -157,15 +167,14 @@ public class AndroidNumberWidget extends AndroidInputWidget<Number> implements
 
 	@Override
 	public void doRefresh() {
-		final Number value = (Number) get().getValue();
-		if (Float.compare(slider.getValue(), value.floatValue()) == 0) return; // no change
-		threadService.queue(() -> slider.setValue(value.floatValue()));
+		// not happening
 	}
 
 	@Override
 	public void onValueChange(@NonNull Slider slider, float value, boolean fromUser) {
 		// only update model from user action on stop tracking touch, not on every value change
 		if(!fromUser) {
+			this.value = value;
 			threadService.run(this::updateModel);
 		}
 	}
@@ -176,32 +185,13 @@ public class AndroidNumberWidget extends AndroidInputWidget<Number> implements
 
 	@Override
 	public void onStopTrackingTouch(@NonNull Slider slider) {
+		this.value = slider.getValue();
 		threadService.run(this::updateModel);
 	}
 
 	@Override
-	public AndroidInputWidget getComponent() {
-		return this;
-	}
-
-	@Override
-	public boolean onTouch(View v, MotionEvent event) {
-		int action = event.getAction();
-		switch (action)
-		{
-			case MotionEvent.ACTION_DOWN:
-				// Disallow ScrollView to intercept touch events.
-				v.getParent().requestDisallowInterceptTouchEvent(true);
-				break;
-
-			case MotionEvent.ACTION_UP:
-				// Allow ScrollView to intercept touch events.
-				v.getParent().requestDisallowInterceptTouchEvent(false);
-				break;
-		}
-
-		// Handle Seekbar touch events.
-		v.onTouchEvent(event);
-		return false;
+	public Slider getComponent() {
+		// since we are using RecyclerViews, there is no fixed component associated with a widget
+		return null;
 	}
 }

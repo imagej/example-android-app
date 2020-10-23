@@ -1,39 +1,50 @@
 package org.scijava.android.ui.widget;
 
+import android.app.Activity;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import org.scijava.Context;
+import org.scijava.Contextual;
+import org.scijava.android.AndroidService;
+import org.scijava.android.R;
+import org.scijava.android.ui.viewer.AndroidDisplayPanel;
+import org.scijava.android.ui.viewer.AndroidViewHolder;
+import org.scijava.android.ui.viewer.module.DefaultModuleDisplay;
+import org.scijava.display.Display;
+import org.scijava.plugin.Parameter;
+import org.scijava.ui.viewer.DisplayPanel;
+import org.scijava.ui.viewer.DisplayWindow;
 import org.scijava.widget.AbstractInputPanel;
 import org.scijava.widget.InputWidget;
-import org.scijava.widget.WidgetModel;
 
-public class AndroidInputPanel extends AbstractInputPanel<ModuleInputsAdapter, AndroidInputWidget> {
+public class AndroidInputPanel extends AbstractInputPanel<RecyclerView, View> implements AndroidDisplayPanel<RecyclerView>, Contextual {
 
+    @Parameter
+    AndroidService androidService;
+
+    @Parameter
+    private Context context;
+
+    private final ViewGroup parent;
     private ModuleInputsAdapter adapter;
+    private Display display;
+    private DisplayWindow window;
+    private String label;
 
-    public AndroidInputPanel(ViewGroup root) {
-        this.component = root;
+    public AndroidInputPanel(Context context) {
+        setContext(context);
+        parent = androidService.getActivity().findViewById(R.id.scijava_control);
+        adapter = new ModuleInputsAdapter(getContext(), R.layout.scijava_control_window_panel);
     }
 
     @Override
     public void addWidget(final InputWidget<?, View> widget) {
         super.addWidget(widget);
-        View widgetPane = widget.getComponent();
-        final WidgetModel model = widget.get();
-
-        // add widget to panel
-        if (widget.isLabeled()) {
-            // widget is prefixed by a label
-            final JLabel l = new JLabel(model.getWidgetLabel());
-            final String desc = model.getItem().getDescription();
-            if (desc != null && !desc.isEmpty()) l.setToolTipText(desc);
-            getComponent().add(l);
-            getComponent().add(widgetPane);
-        }
-        else {
-            // widget occupies entire row
-            getComponent().add(widgetPane, "span");
-        }
+        adapter.addItem((AndroidInputWidget<?, ?>)widget);
     }
 
     @Override
@@ -42,12 +53,87 @@ public class AndroidInputPanel extends AbstractInputPanel<ModuleInputsAdapter, A
     }
 
     @Override
-    public ViewGroup getComponent() {
-        return component;
+    public RecyclerView getComponent() {
+        return null;
     }
 
     @Override
-    public Class<ViewGroup> getComponentType() {
-        return ViewGroup.class;
+    public Class<RecyclerView> getComponentType() {
+        return RecyclerView.class;
+    }
+
+    @Override
+    public Display<?> getDisplay() {
+        return display;
+    }
+
+    @Override
+    public DisplayWindow getWindow() {
+        return window;
+    }
+
+    @Override
+    public void redoLayout() {
+        //TODO
+    }
+
+    @Override
+    public void setLabel(String s) {
+        label = s;
+    }
+
+    @Override
+    public void redraw() {
+
+    }
+
+    public void setDisplay(Display display) {
+        this.display = display;
+    }
+
+    public void setWindow(DisplayWindow window) {
+        this.window = window;
+    }
+
+    @Override
+    public RecyclerView createView(ViewGroup parent) {
+        RecyclerView panel = (RecyclerView) androidService.getActivity().getLayoutInflater().inflate(R.layout.scijava_control_window_recycle, parent, false);
+        panel.setLayoutManager(new LinearLayoutManager(androidService.getActivity()));
+        return panel;
+    }
+
+    @Override
+    public Class getWidgetType() {
+        return RecyclerView.class;
+    }
+
+    @Override
+    public void attach(AndroidViewHolder<RecyclerView> holder) {
+        holder.getItem().setAdapter(adapter);
+    }
+
+    @Override
+    public void detach(AndroidViewHolder holder) {
+        // seems I can't detach the adapter ..
+    }
+
+    @Override
+    public boolean isLabeled() {
+        return label != null;
+    }
+
+    @Override
+    public String getLabel() {
+        return label;
+    }
+
+    @Override
+    public Context context() {
+        return context;
+    }
+
+    @Override
+    public Context getContext() {
+        return context;
     }
 }

@@ -4,8 +4,12 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Message;
+import android.util.TypedValue;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import net.imagej.display.ColorTables;
 import net.imagej.display.SourceOptimizedCompositeXYProjector;
@@ -27,7 +31,9 @@ import net.imglib2.view.IterableRandomAccessibleInterval;
 import net.imglib2.view.Views;
 
 import org.scijava.Context;
+import org.scijava.android.AndroidService;
 import org.scijava.android.ui.viewer.AndroidDisplayPanel;
+import org.scijava.android.ui.viewer.AndroidViewHolder;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.thread.ThreadService;
@@ -37,11 +43,9 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class AndroidRandomAccessibleDisplayPanel implements RandomAccessibleIntervalDisplayPanel, AndroidDisplayPanel {
+public class AndroidRandomAccessibleDisplayPanel implements RandomAccessibleIntervalDisplayPanel, AndroidDisplayPanel<ImageView> {
 	private final AndroidRandomAccessibleIntervalDisplay display;
 	private final DisplayWindow window;
-
-	private final ImageView content;
 
 	@Parameter
 	private ThreadService threadService;
@@ -49,10 +53,13 @@ public class AndroidRandomAccessibleDisplayPanel implements RandomAccessibleInte
 	@Parameter
 	private LogService logService;
 
-	public AndroidRandomAccessibleDisplayPanel(Activity activity, AndroidRandomAccessibleIntervalDisplay display, DisplayWindow window) {
+	@Parameter
+	private AndroidService androidService;
+	private AndroidViewHolder<ImageView> holder;
+
+	public AndroidRandomAccessibleDisplayPanel(AndroidRandomAccessibleIntervalDisplay display, DisplayWindow window) {
 		display.context().inject(this);
 		this.display = display;
-		content = new ImageView(activity);
 		this.window = window;
 		window.setContent(this);
 	}
@@ -82,34 +89,52 @@ public class AndroidRandomAccessibleDisplayPanel implements RandomAccessibleInte
 	@Override
 	public void redraw() {
 
-		Handler handler = new BitmapHandler(this);
+		if(holder == null) return;
+		Handler handler = new BitmapHandler(this, holder.getItem());
 		new Thread(() -> {
 			Bitmap bitmap = toBufferedImage(display.getActiveRAI());
-			redraw(bitmap);
 			Message msg = Message.obtain(handler, 0, bitmap);
 			handler.sendMessage(msg);
 		}).start();
 	}
 
-	static class BitmapHandler extends Handler {
-		private final WeakReference<AndroidRandomAccessibleDisplayPanel> panel;
-
-		public BitmapHandler(AndroidRandomAccessibleDisplayPanel panel) {
-			this.panel = new WeakReference<>(panel);
-		}
-		@Override
-		public void handleMessage(Message msg){
-			panel.get().redraw((Bitmap) msg.obj);
-		}
-	}
-
-	private void redraw(Bitmap bitmap) {
-		threadService.queue(() -> content.setImageBitmap(bitmap));
+	@Override
+	public ImageView createView(ViewGroup parent) {
+		LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+		return (ImageView) inflater.inflate(net.imagej.android.R.layout.viewer_image, parent, false);
 	}
 
 	@Override
-	public View getPanel() {
-		return content;
+	public Class<ImageView> getWidgetType() {
+		return ImageView.class;
+	}
+
+	@Override
+	public void attach(AndroidViewHolder<ImageView> holder) {
+		this.holder = holder;
+	}
+
+	@Override
+	public void detach(AndroidViewHolder<ImageView> holder) {
+		this.holder = null;
+	}
+
+	static class BitmapHandler extends Handler {
+		private final WeakReference<AndroidRandomAccessibleDisplayPanel> panel;
+		private final WeakReference<ImageView> content;
+
+		public BitmapHandler(AndroidRandomAccessibleDisplayPanel panel, ImageView content) {
+			this.panel = new WeakReference<>(panel);
+			this.content = new WeakReference<>(content);
+		}
+		@Override
+		public void handleMessage(Message msg){
+			panel.get().redraw((Bitmap) msg.obj, content.get());
+		}
+	}
+
+	private void redraw(Bitmap bitmap, ImageView content) {
+		threadService.queue(() -> content.setImageBitmap(bitmap));
 	}
 
 	private <T extends RealType<T>, U> Bitmap toBufferedImage(RandomAccessibleInterval<U> img) {

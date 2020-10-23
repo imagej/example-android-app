@@ -28,17 +28,14 @@ public class InteractiveCommandDisplayUpdate extends InteractiveCommand {
     private DisplayService ds;
 
     @Override
-    public void preview() {
-        super.preview();
-        ds = context().service(DisplayService.class);
-
-        for (final ModuleItem<?> outputItem : getInfo().outputs()) {
-//            if (isOutputResolved(outputItem.getName())) continue;
-            handleOutput(outputItem.getName(), getOutput(outputItem.getName()));
+    public void setOutput(String name, Object value) {
+        super.setOutput(name, value);
+        if(ds == null) {
+            ds = context().service(DisplayService.class);
         }
+        resolveOutput(name);
+        handleOutput(name, value);
     }
-
-    // -- Helper methods --
 
     /**
      * Displays output objects.
@@ -122,23 +119,5 @@ public class InteractiveCommandDisplayUpdate extends InteractiveCommand {
         return false;
     }
 
-    private boolean addToExisting(final Object output) {
-        // TODO - find a general way to decide this
-        // Current thinking is that with the pending display refactoring, each
-        // display will stop being a list and instead handle a single object.
-        // Once that happens, the idea of adding a new output to an existing display
-        // will largely disappear, obviating the need for this logic. In the case
-        // of images specifically there could be another PostprocessorPlugin that
-        // handles that special case in some fashion, though.
-        return false;
-    }
-
-    private String defaultName(final ModuleItem<?> item) {
-        final String label = item.getLabel();
-        if (label != null && !label.isEmpty()) return label;
-        final String name = item.getName();
-        if (name != null && !name.isEmpty()) return name;
-        return "Unnamed";
-    }
 
 }

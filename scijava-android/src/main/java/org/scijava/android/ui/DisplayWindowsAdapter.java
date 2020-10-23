@@ -3,6 +3,7 @@ package org.scijava.android.ui;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -82,8 +83,16 @@ public class DisplayWindowsAdapter extends
         TextView textView = holder.nameTextView;
         textView.setText(input.getDisplay().getName());
         FrameLayout content = holder.contentView;
-        content.removeAllViews();
-        content.addView(input.getPanel());
+        if(content.getChildCount() > 0) {
+            content.removeAllViews();
+            ViewGroup parent = (ViewGroup) input.getPanel().getParent();
+            if(parent != null) {
+                parent.removeView(input.getPanel());
+            }
+            content.addView(input.getPanel());
+        } else {
+            content.addView(input.getPanel());
+        }
     }
 
     @Override

@@ -1,6 +1,7 @@
 package net.imagej.android.example;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -22,6 +23,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     private Camera mCamera;
     private List<Camera.Size> mSupportedPreviewSizes;
     private Camera.Size mPreviewSize;
+    private int orientation;
 
     public CameraPreview(Context context, Camera camera) {
         super(context);
@@ -51,6 +53,10 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         Log.e(TAG, "surfaceChanged => w=" + w + ", h=" + h);
+        setConfigRestartPreview();
+    }
+
+    private void setConfigRestartPreview() {
         // If your preview can change or rotate, take care of those events here.
         // Make sure to stop the preview before resizing or reformatting it.
         if (mHolder.getSurface() == null){
@@ -76,7 +82,11 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
                 }
             }
             mCamera.setParameters(parameters);
-            mCamera.setDisplayOrientation(90);
+            if(orientation == Configuration.ORIENTATION_PORTRAIT) {
+                mCamera.setDisplayOrientation(90);
+            } else {
+                mCamera.setDisplayOrientation(0);
+            }
             mCamera.setPreviewDisplay(mHolder);
             mCamera.startPreview();
 
@@ -145,5 +155,10 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
     public void removeCamera() {
         mCamera = null;
+    }
+
+    public void setOrientation(int orientation) {
+        this.orientation = orientation;
+        setConfigRestartPreview();
     }
 }

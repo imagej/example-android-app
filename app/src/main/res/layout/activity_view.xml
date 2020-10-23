@@ -5,26 +5,31 @@
     android:id="@+id/myCoordinatorLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0099cc"
     tools:context="net.imagej.android.example.MainActivity">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:tag="scijava-content"
         android:layout_width="match_parent"
-        android:background="#2da1e3"
         android:layout_height="match_parent">
         <LinearLayout
             android:id="@+id/main_content"
-            android:background="#2da1e3"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
             <FrameLayout
                 android:id="@+id/camera_preview"
                 android:layout_width="match_parent"
-                android:background="#ff0000"
+                android:background="#000000"
                 android:layout_weight="1"
-                android:layout_height="0dp" />
+                android:layout_height="0dp">
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/make_picture_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_margin="16dp"
+                    android:src="@android:drawable/ic_menu_camera"
+                    android:contentDescription="@string/take_picture_button" /></FrameLayout>
             <LinearLayout
                 android:id="@+id/scijava_group"
                 android:background="#eeeeee"
@@ -37,33 +42,6 @@
             </LinearLayout>
 
         </LinearLayout>
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/make_picture_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|end"
-            android:layout_marginBottom="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:src="@android:drawable/ic_menu_camera"/>
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/share_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|end"
-            android:layout_marginBottom="0dp"
-            android:layout_marginEnd="0dp"
-            android:layout_marginLeft="0dp"
-            android:layout_marginRight="0dp"
-            android:layout_marginStart="0dp"
-            android:layout_marginTop="85dp"
-            android:src="@android:drawable/ic_menu_share"
-            app:layout_anchor="@id/make_picture_button"
-            app:layout_anchorGravity="bottom"/>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 </FrameLayout>

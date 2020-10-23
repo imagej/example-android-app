@@ -2,6 +2,7 @@ package net.imagej.android.example;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.drawable.GradientDrawable;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.view.View;
@@ -29,8 +30,6 @@ public class MainActivity extends AppCompatActivity {
 
     private AndroidGateway gateway;
 
-//    private ASCIICommand asciiCommand;
-
     private CameraHandler cameraHandler;
     private RandomAccessibleInterval<ARGBType> img;
 
@@ -38,10 +37,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupBaseLayout();
-
         launchGateway();
-
         setupCamera();
+        setContentViewLayout();
         setupTakePictureButton();
         setupShareButton();
     }
@@ -89,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setContentViewLayout() {
+        cameraHandler.setOrientation(getResources().getConfiguration().orientation);
         int align = LinearLayout.VERTICAL;
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             align = LinearLayout.HORIZONTAL;
@@ -140,7 +139,9 @@ public class MainActivity extends AppCompatActivity {
     private void makeImage(byte[] bytes, Camera.Size size) {
         img = new ArrayImgFactory<>(new ARGBType()).create(size.width, size.height);
         ImgLibUtils.cameraBytesToImage(bytes, img);
-        img = Views.zeroMin(Views.rotate(img, 0, 1));
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            img = Views.zeroMin(Views.rotate(img, 0, 1));
+        }
     }
 
     private void setupShareButton() {

@@ -106,4 +106,8 @@ class CameraHandler {
     public View getPreviewView() {
         return previewView;
     }
+
+    public void setOrientation(int orientation) {
+        preview.setOrientation(orientation);
+    }
 }

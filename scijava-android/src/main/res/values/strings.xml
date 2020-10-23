@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="explain_commands_view">CONTROLS</string>
+    <string name="explain_display_view">VIEWS</string>
+</resources>

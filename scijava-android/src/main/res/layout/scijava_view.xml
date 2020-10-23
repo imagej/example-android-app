@@ -4,16 +4,32 @@
     android:layout_width="match_parent"
     android:layout_height="0dp"
     android:layout_weight="1">
-    <androidx.recyclerview.widget.RecyclerView xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/scijava_view_rw"
+    <ViewSwitcher
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:scrollbars="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+        android:id="@+id/switcher"
+        >
+
+        <TextView android:id="@+id/text_empty"
+            style="@style/Widget.SciJava.Placeholder"
+            android:text="@string/explain_display_view"
+            />
+
+
+        <androidx.recyclerview.widget.RecyclerView xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/scijava_view_rw"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:scrollbars="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+
+    </ViewSwitcher>
+
 
 </FrameLayout>

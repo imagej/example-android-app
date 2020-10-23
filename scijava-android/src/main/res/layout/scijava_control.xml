@@ -4,22 +4,34 @@ android:id="@+id/scijava_control"
 android:layout_width="match_parent"
 android:layout_height="0dp"
 android:layout_weight="1">
-<!--<androidx.core.widget.NestedScrollView-->
-<!--    android:layout_width="match_parent"-->
-<!--    android:layout_height="match_parent">-->
-<androidx.recyclerview.widget.RecyclerView xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/scijava_control_rw"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="horizontal"
-    android:scrollbars="horizontal"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
-    android:nestedScrollingEnabled="false"
-    android:focusable="false"
-    android:focusableInTouchMode="false"
-    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
-<!--</androidx.core.widget.NestedScrollView>-->
+
+    <ViewSwitcher
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/switcher"
+        >
+
+        <TextView android:id="@+id/text_empty"
+            style="@style/Widget.SciJava.Placeholder"
+            android:text="@string/explain_commands_view"
+            />
+
+        <androidx.recyclerview.widget.RecyclerView xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/scijava_control_rw"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:scrollbars="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:nestedScrollingEnabled="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+
+    </ViewSwitcher>
+
+
 </FrameLayout>

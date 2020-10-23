@@ -30,8 +30,11 @@
 
 package org.scijava.android.ui;
 
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ViewSwitcher;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.scijava.Context;
@@ -161,6 +164,22 @@ public class DefaultAndroidUI extends AbstractUserInterface implements
 		RecyclerView rv = view.findViewById(recyclerId);
 		DisplayWindowsAdapter adapter = new DisplayWindowsAdapter(getContext(), adapterLayoutId);
 		rv.setAdapter(adapter);
+		ViewSwitcher switcher = view.findViewById(R.id.switcher);
+		if(switcher != null) {
+			adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+				@Override
+				public void onItemRangeInserted(int positionStart, int itemCount) {
+					super.onItemRangeInserted(positionStart, itemCount);
+					if(adapter.getItemCount() == 1) switcher.showNext();
+				}
+
+				@Override
+				public void onItemRangeRemoved(int positionStart, int itemCount) {
+					super.onItemRangeRemoved(positionStart, itemCount);
+					if(adapter.getItemCount() == 0) switcher.showPrevious();
+				}
+			});
+		}
 		return adapter;
 	}
 }

@@ -33,12 +33,16 @@ package org.scijava.android.ui.widget;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.slider.Slider;
 
 import org.scijava.android.AndroidService;
+import org.scijava.android.R;
 import org.scijava.log.LogService;
 import org.scijava.module.ModuleService;
 import org.scijava.plugin.Parameter;
@@ -73,6 +77,18 @@ public class AndroidNumberWidget extends AndroidInputWidget<Number> implements
 	private AndroidService androidService;
 
 	Slider slider;
+
+	@Override
+	public Slider createView(ViewGroup parent) {
+		Slider view = new Slider(androidService.getActivity());
+		return view;
+	}
+
+	public void setView(View view) {
+		view
+		nameTextView = itemView.findViewById(R.id.input_name);
+		contentView = itemView.findViewById(R.id.input_widget);
+	}
 
 	// -- InputWidget methods --
 
@@ -164,8 +180,8 @@ public class AndroidNumberWidget extends AndroidInputWidget<Number> implements
 	}
 
 	@Override
-	public View getComponent() {
-		return slider;
+	public AndroidInputWidget getComponent() {
+		return this;
 	}
 
 	@Override

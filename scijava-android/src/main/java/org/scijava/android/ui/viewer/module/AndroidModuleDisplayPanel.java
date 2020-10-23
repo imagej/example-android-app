@@ -41,7 +41,7 @@ public class AndroidModuleDisplayPanel implements AndroidDisplayPanel {
 
 	private ViewGroup setupPanelAdapter(ViewGroup root, Activity activity) {
 		RecyclerView rvInputs = (RecyclerView) activity.getLayoutInflater().inflate(R.layout.scijava_control_window_recycle, root, false);
-		adapter = new ModuleInputsAdapter(context);
+		adapter = new ModuleInputsAdapter(context, rvInputs);
 		rvInputs.setAdapter(adapter);
 		rvInputs.setLayoutManager(new LinearLayoutManager(activity));
 		return rvInputs;

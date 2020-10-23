@@ -33,15 +33,11 @@ package org.scijava.android.ui.widget;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.appcompat.widget.LinearLayoutCompat;
+import androidx.recyclerview.widget.RecyclerView;
 
-import org.scijava.android.AndroidService;
-import org.scijava.android.R;
 import org.scijava.android.ui.AndroidUI;
-import org.scijava.plugin.Parameter;
 import org.scijava.ui.AbstractUIInputWidget;
 import org.scijava.ui.UserInterface;
-import org.scijava.widget.WidgetModel;
 
 /**
  * Common superclass for Android-based input widgets.
@@ -49,11 +45,11 @@ import org.scijava.widget.WidgetModel;
  * @author Deborah Schmidt
  */
 public abstract class AndroidInputWidget<T> extends
-	AbstractUIInputWidget<T, View>
+	AbstractUIInputWidget<T, AndroidInputWidget>
 {
 	@Override
-	public Class<View> getComponentType() {
-		return View.class;
+	public Class<AndroidInputWidget> getComponentType() {
+		return AndroidInputWidget.class;
 	}
 
 	// -- AbstractUIInputWidget methods --
@@ -63,4 +59,9 @@ public abstract class AndroidInputWidget<T> extends
 		return ui(AndroidUI.NAME);
 	}
 
+	public abstract RecyclerView.ViewHolder createViewHolder(ViewGroup itemView);
+
+	public abstract View createView(ViewGroup parent);
+
+	public abstract void setValue()
 }

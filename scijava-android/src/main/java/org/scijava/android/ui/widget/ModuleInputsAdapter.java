@@ -20,12 +20,15 @@ import org.scijava.module.ModuleItem;
 import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
 import org.scijava.widget.DefaultWidgetModel;
+import org.scijava.widget.InputPanel;
 import org.scijava.widget.InputWidget;
 import org.scijava.widget.WidgetModel;
 import org.scijava.widget.WidgetService;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ModuleInputsAdapter extends
     RecyclerView.Adapter<ModuleInputsAdapter.ViewHolder> implements Contextual {
@@ -45,20 +48,25 @@ public class ModuleInputsAdapter extends
     @Parameter
     private Context context;
 
-    private final List<Pair<WidgetModel, InputWidget<?,?>>> inputs;
+    private final List<Pair<WidgetModel, AndroidInputWidget<?>>> inputs;
+    private final List<Class<RecyclerView.ViewHolder>> viewTypes;
+    private final List<AndroidInputWidget<?>> viewHolderCreators;
 
-    public ModuleInputsAdapter(Context context) {
+    public ModuleInputsAdapter(Context context, ViewGroup root) {
         setContext(context);
         inputs = new ArrayList<>();
+        viewTypes = new ArrayList<>();
+        viewHolderCreators = new ArrayList<>();
     }
 
     public void load(Module module) {
         inputs.clear();
+        viewHolderCreators.clear();
         module.getInfo().inputs().forEach(moduleItem -> {
             try {
                 WidgetModel model = getWidgetModel(module, moduleItem);
                 if(model == null) return;
-                InputWidget<?, ?> widget = getWidget(model, moduleItem);
+                AndroidInputWidget<?> widget = (AndroidInputWidget<?>) getWidget(model, moduleItem);
                 if(widget == null) return;
                 inputs.add(new Pair<>(model, widget));
                 model.setInitialized(true);
@@ -117,35 +125,44 @@ public class ModuleInputsAdapter extends
 
     @Override
     public Context getContext() {
-        return null;
+        return context;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public TextView nameTextView;
         public FrameLayout contentView;
 
-        public ViewHolder(View itemView) {
-            super(itemView);
-            nameTextView = itemView.findViewById(R.id.input_name);
-            contentView = itemView.findViewById(R.id.input_widget);
+        public ViewHolder(View parent, View item) {
+            super(parent);
+            nameTextView = parent.findViewById(R.id.input_name);
+            contentView = parent.findViewById(R.id.input_widget);
+            contentView.addView(item);
         }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        Class<RecyclerView.ViewHolder> componentType = inputs.get(position).second.getComponentType();
+        for (int i = 0; i < viewTypes.size(); i++) {
+            if (componentType.equals(viewTypes.get(i))) return i;
+        }
+        viewTypes.add(componentType);
+        viewHolderCreators.add(inputs.get(position).second);
+        return viewTypes.size()-1;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         android.content.Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
-
         View inputPanelView = inflater.inflate(R.layout.scijava_control_window_panel, parent, false);
-
-        return new ViewHolder(inputPanelView);
+        return new ViewHolder(inputPanelView, viewHolderCreators.get(viewType).createView(parent));
     }
 
-    // Involves populating data into the item through holder
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        // Get the data model based on position
-        Pair<WidgetModel, InputWidget<?, ?>> input = inputs.get(position);
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
+
+        Pair<WidgetModel, AndroidInputWidget<?>> input = inputs.get(position);
 
         // Set item views based on your views and data model
         TextView textView = holder.nameTextView;
@@ -153,6 +170,18 @@ public class ModuleInputsAdapter extends
         FrameLayout content = holder.contentView;
         content.removeAllViews();
         content.addView((View) input.second.getComponent());
+
+        switch (holder.getItemViewType()) {
+            case 0:
+                ViewHolder0 viewHolder0 = (ViewHolder0)holder;
+                ...
+                break;
+
+            case 2:
+                ViewHolder2 viewHolder2 = (ViewHolder2)holder;
+                ...
+                break;
+        }
     }
 
     // Returns the total count of items in the list

@@ -19,6 +19,7 @@ import org.scijava.module.ModuleException;
 import org.scijava.module.ModuleItem;
 import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
+import org.scijava.widget.DefaultWidgetModel;
 import org.scijava.widget.InputWidget;
 import org.scijava.widget.WidgetModel;
 import org.scijava.widget.WidgetService;
@@ -44,7 +45,7 @@ public class ModuleInputsAdapter extends
     @Parameter
     private Context context;
 
-    private final List<Pair<ImprovedWidgetModel, InputWidget<?,?>>> inputs;
+    private final List<Pair<WidgetModel, InputWidget<?,?>>> inputs;
 
     public ModuleInputsAdapter(Context context) {
         setContext(context);
@@ -55,7 +56,7 @@ public class ModuleInputsAdapter extends
         inputs.clear();
         module.getInfo().inputs().forEach(moduleItem -> {
             try {
-                ImprovedWidgetModel model = getWidgetModel(module, moduleItem);
+                WidgetModel model = getWidgetModel(module, moduleItem);
                 if(model == null) return;
                 InputWidget<?, ?> widget = getWidget(model, moduleItem);
                 if(widget == null) return;
@@ -68,14 +69,14 @@ public class ModuleInputsAdapter extends
         });
     }
 
-    private <T> ImprovedWidgetModel getWidgetModel(final Module module, final ModuleItem<T> item) throws ModuleException
+    private <T> WidgetModel getWidgetModel(final Module module, final ModuleItem<T> item) throws ModuleException
     {
         final String name = item.getName();
         final boolean resolved = module.isInputResolved(name);
         if (resolved) return null; // skip resolved inputs
 
         final Class<T> type = item.getType();
-        return new ImprovedWidgetModel(context, module, item, getObjects(type));
+        return new DefaultWidgetModel(context, null, module, item, getObjects(type));
     }
 
     private InputWidget<?, ?> getWidget(WidgetModel model, ModuleItem<?> moduleItem) throws ModuleException {
@@ -144,7 +145,7 @@ public class ModuleInputsAdapter extends
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         // Get the data model based on position
-        Pair<ImprovedWidgetModel, InputWidget<?, ?>> input = inputs.get(position);
+        Pair<WidgetModel, InputWidget<?, ?>> input = inputs.get(position);
 
         // Set item views based on your views and data model
         TextView textView = holder.nameTextView;

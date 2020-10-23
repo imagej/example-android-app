@@ -171,6 +171,7 @@ public class DefaultAndroidUI extends AbstractUserInterface implements
 				public void onItemRangeInserted(int positionStart, int itemCount) {
 					super.onItemRangeInserted(positionStart, itemCount);
 					if(adapter.getItemCount() == 1) switcher.showNext();
+					rv.scrollToPosition(adapter.getItemCount() - 1);
 				}
 
 				@Override

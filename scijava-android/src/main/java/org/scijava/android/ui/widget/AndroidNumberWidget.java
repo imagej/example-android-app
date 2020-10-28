@@ -105,6 +105,27 @@ public class AndroidNumberWidget extends AndroidInputWidget<Number, Slider> impl
 
 	@Override
 	public void attach(AndroidViewHolder<Slider> holder) {
+		super.attach(holder);
+		Slider slider = holder.getItem();
+		slider.addOnChangeListener(this);
+		slider.addOnSliderTouchListener(this);
+	}
+
+	@Override
+	public void detach(AndroidViewHolder<Slider> holder) {
+		Slider slider = holder.getItem();
+		slider.removeOnChangeListener(this);
+		slider.removeOnSliderTouchListener(this);
+		super.detach(holder);
+	}
+
+	@Override
+	public void updateContent() {
+
+	}
+
+	@Override
+	public void updateView(Slider slider) {
 		final Number min = get().getMin();
 		final Number max = get().getMax();
 		final Number softMin = get().getSoftMin();
@@ -123,7 +144,6 @@ public class AndroidNumberWidget extends AndroidInputWidget<Number, Slider> impl
 			return;
 		}
 		final Number value = (Number) get().getValue();
-		Slider slider = holder.getItem();
 		if(min.intValue() >= 0) {
 			slider.setValueFrom(min.floatValue());
 		}
@@ -131,17 +151,6 @@ public class AndroidNumberWidget extends AndroidInputWidget<Number, Slider> impl
 			slider.setValueTo(max.floatValue());
 		}
 		slider.setValue(value.floatValue());
-		slider.addOnChangeListener(this);
-		slider.addOnSliderTouchListener(this);
-
-		refreshWidget();
-	}
-
-	@Override
-	public void detach(AndroidViewHolder<Slider> holder) {
-		Slider slider = holder.getItem();
-		slider.removeOnChangeListener(this);
-		slider.removeOnSliderTouchListener(this);
 	}
 
 	// -- InputWidget methods --
@@ -189,9 +198,4 @@ public class AndroidNumberWidget extends AndroidInputWidget<Number, Slider> impl
 		threadService.run(this::updateModel);
 	}
 
-	@Override
-	public Slider getComponent() {
-		// since we are using RecyclerViews, there is no fixed component associated with a widget
-		return null;
-	}
 }

@@ -72,6 +72,7 @@ public class WindowViewAdapterBuilder {
         @Override
         public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
             int position = viewHolder.getAdapterPosition();
+            System.out.println("ADAPTERPOSITION: " + position);
             adapter.removeItem(position);
         }
 

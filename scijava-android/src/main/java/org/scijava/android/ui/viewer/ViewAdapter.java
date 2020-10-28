@@ -49,6 +49,8 @@ public class ViewAdapter<T extends AndroidDataView<?>> extends RecyclerView.Adap
     private final List<AndroidViewHolderBuilder> viewHolderBuilder;
     private final int adapterLayout;
 
+    private ListItemClickListener onClickListener;
+
     public ViewAdapter(Context context, int adapterLayout) {
         setContext(context);
         this.adapterLayout = adapterLayout;
@@ -70,9 +72,10 @@ public class ViewAdapter<T extends AndroidDataView<?>> extends RecyclerView.Adap
         }
         viewTypes.add(componentType);
 
-        viewHolderBuilder.add(items.get(position).getViewHolderBuilder());
+        viewHolderBuilder.add(items.get(position).getViewHolderBuilder(this));
         return viewTypes.size()-1;
     }
+
     @NonNull
     @Override
     public AndroidViewHolder<?> onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -81,12 +84,12 @@ public class ViewAdapter<T extends AndroidDataView<?>> extends RecyclerView.Adap
         ViewGroup contentView = parentView.findViewById(R.id.content);
         return viewHolderBuilder.get(viewType).apply(parentView, contentView);
     }
-
     @Override
     public void onBindViewHolder(final AndroidViewHolder holder, final int position) {
+        System.out.println("holder bound: " + holder.getAdapterPosition());
         T item = items.get(position);
-        item.attach(holder);
         holder.input = item;
+        item.attach(holder);
         TextView textView = holder.labelView;
         if (item.isLabeled()) {
             textView.setText(item.getLabel());
@@ -94,22 +97,23 @@ public class ViewAdapter<T extends AndroidDataView<?>> extends RecyclerView.Adap
         } else {
             textView.setVisibility(View.INVISIBLE);
         }
-        holder.input.update();
+        item.updateHolder();
     }
 
     @Override
     public void onViewRecycled(@NonNull AndroidViewHolder<?> holder) {
+//        System.out.println("View recycled: " + holder.getAdapterPosition());
+        super.onViewRecycled(holder);
         AndroidDataView item = holder.input;
         if(item != null) {
             item.detach(holder);
             holder.input = null;
         }
-        super.onViewRecycled(holder);
     }
 
     public void removeItem(int position) {
+        System.out.println("REMOVE ITEM " + position);
         items.remove(position);
-        notifyItemRemoved(position);
     }
 
     private void removeItem(T item) {
@@ -137,7 +141,16 @@ public class ViewAdapter<T extends AndroidDataView<?>> extends RecyclerView.Adap
         return context;
     }
 
+    public void setOnClickListener(ListItemClickListener onClickListener) {
+        this.onClickListener = onClickListener;
+    }
+
+    public <W extends View> void onItemClick(int position) {
+        if(onClickListener != null) onClickListener.onItemClick(items.get(position));
+    }
+
     private class ObservableListCallback extends  ObservableList.OnListChangedCallback<ObservableList<T>>{
+
 
         @Override
         public void onChanged(ObservableList<T> sender) {
@@ -161,10 +174,16 @@ public class ViewAdapter<T extends AndroidDataView<?>> extends RecyclerView.Adap
 
         @Override
         public void onItemRangeRemoved(ObservableList<T> sender, int positionStart, int itemCount) {
+            System.out.println("ON ITEM RANGE REMOVED " + positionStart + " " + itemCount);
+//            notifyItemRemoved(positionStart);
             notifyItemRangeRemoved(positionStart, itemCount);
         }
+
     }
 
+    interface ListItemClickListener{
 
+        void onItemClick(AndroidDataView<? extends View> item);
 
+    }
 }

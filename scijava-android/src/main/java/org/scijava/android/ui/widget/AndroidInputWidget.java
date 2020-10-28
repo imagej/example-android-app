@@ -32,8 +32,11 @@ package org.scijava.android.ui.widget;
 
 import android.view.View;
 
+import com.google.android.material.slider.Slider;
+
 import org.scijava.android.ui.AndroidUI;
 import org.scijava.android.ui.viewer.AndroidDataView;
+import org.scijava.android.ui.viewer.AndroidViewHolder;
 import org.scijava.ui.AbstractUIInputWidget;
 import org.scijava.ui.UserInterface;
 
@@ -48,11 +51,18 @@ import org.scijava.ui.UserInterface;
 public abstract class AndroidInputWidget<T, W extends View> extends
 	AbstractUIInputWidget<T, View> implements AndroidDataView<W> {
 
+	private AndroidViewHolder<W> holder;
+
 	@Override
 	protected UserInterface ui() {
 		return ui(AndroidUI.NAME);
 	}
 
+	@Override
+	public W getComponent() {
+		// since we are using RecyclerViews, there is no fixed component associated with a widget
+		return null;
+	}
 	@Override
 	public Class<View> getComponentType() {
 		return View.class;
@@ -69,7 +79,17 @@ public abstract class AndroidInputWidget<T, W extends View> extends
 	}
 
 	@Override
-	public void update() {
-		refreshWidget();
+	public void attach(AndroidViewHolder<W> holder) {
+		this.holder = holder;
+	}
+
+	@Override
+	public void detach(AndroidViewHolder<W> holder) {
+		this.holder = null;
+	}
+
+	@Override
+	public AndroidViewHolder<W> getViewHolder() {
+		return holder;
 	}
 }

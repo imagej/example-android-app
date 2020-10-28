@@ -2,31 +2,29 @@ package org.scijava.android.ui.viewer.text;
 
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.text.Html;
 import android.util.TypedValue;
-import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.scijava.android.R;
-import org.scijava.android.ui.viewer.AndroidDisplayPanel;
-import org.scijava.android.ui.viewer.AndroidViewHolder;
+import org.scijava.android.ui.viewer.AbstractAndroidDisplayPanel;
+import org.scijava.android.ui.viewer.Shareable;
 import org.scijava.display.TextDisplay;
 import org.scijava.ui.viewer.DisplayWindow;
 import org.scijava.ui.viewer.text.TextDisplayPanel;
 
-public class AndroidTextDisplayPanel implements TextDisplayPanel, AndroidDisplayPanel<TextView> {
+public class AndroidTextDisplayPanel extends AbstractAndroidDisplayPanel<TextView> implements TextDisplayPanel, Shareable {
 	private final TextDisplay display;
 	private final DisplayWindow window;
-	private final Activity activity;
-	private AndroidViewHolder<TextView> holder;
+	private String displayText;
 
-	public AndroidTextDisplayPanel(TextDisplay display, DisplayWindow window, Activity activity) {
+	public AndroidTextDisplayPanel(TextDisplay display, DisplayWindow window) {
 		display.getContext().inject(this);
 		this.display = display;
 		this.window = window;
-		this.activity = activity;
 		window.setContent(this);
 	}
 
@@ -54,35 +52,27 @@ public class AndroidTextDisplayPanel implements TextDisplayPanel, AndroidDisplay
 	}
 
 	@Override
-	public void redoLayout() {
-		if(holder == null) return;
-		holder.getItem().refreshDrawableState();
+	public void updateContent() {
+		displayText = display.get(display.size()-1);
 	}
 
 	@Override
-	public void setLabel(final String s) {
-		// nothing happening here
-	}
-
-	@Override
-	public void redraw() {
-		if(holder == null) return;
-		final String text = display.get(display.size()-1);
-		final boolean html = text.startsWith("<html>");
+	public void updateView(TextView item) {
+		final boolean html = displayText.startsWith("<html>");
 		if(html) {
-			holder.getItem().setText(Html.fromHtml(text));
+			item.setText(Html.fromHtml(displayText));
 		} else {
-			holder.getItem().setText(text);
-			long lineCount = text.chars().filter(ch -> ch == '\n').count()+1;
-			holder.getItem().setMaxLines((int) lineCount);
+			item.setText(displayText);
+			long lineCount = displayText.chars().filter(ch -> ch == '\n').count()+1;
+			item.setMaxLines((int) lineCount);
 		}
 		redoLayout();
 	}
 
 	@Override
 	public TextView createView(ViewGroup parent) {
-		LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-		TextView panel = (TextView) inflater.inflate(R.layout.viewer_text, parent, false);
+		TextView panel = new TextView(parent.getContext(), null, R.style.Widget_SciJava_Panel_Text);
+		panel.setTypeface(Typeface.MONOSPACE);
 		panel.setAutoSizeTextTypeUniformWithConfiguration(
 				1, 100, 1, TypedValue.COMPLEX_UNIT_PX);
 		return panel;
@@ -94,13 +84,12 @@ public class AndroidTextDisplayPanel implements TextDisplayPanel, AndroidDisplay
 	}
 
 	@Override
-	public void attach(AndroidViewHolder<TextView> holder) {
-		this.holder = holder;
+	public void share(Activity activity) {
+		Intent intent = new Intent();
+		intent.setAction(Intent.ACTION_SEND);
+		intent.putExtra(Intent.EXTRA_TEXT, displayText);
+		intent.setType("text/plain");
+		Intent shareIntent = Intent.createChooser(intent, "Share " + getLabel());
+		activity.startActivity(shareIntent);
 	}
-
-	@Override
-	public void detach(AndroidViewHolder<TextView> holder) {
-		this.holder = null;
-	}
-
 }

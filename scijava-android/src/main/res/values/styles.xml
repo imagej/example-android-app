@@ -26,7 +26,6 @@
     <style name="Widget.SciJava.Panel.Text" parent="Widget.MaterialComponents.TextView">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">match_parent</item>
-        <item name="singleLine">false</item>
         <item name="android:typeface">monospace</item>
         <item name="autoSizeTextType">uniform</item>
     </style>

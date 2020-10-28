@@ -1,15 +1,17 @@
 package net.imagej.android.ui.viewer.image;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
-import android.util.TypedValue;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import net.imagej.display.ColorTables;
 import net.imagej.display.SourceOptimizedCompositeXYProjector;
@@ -17,23 +19,21 @@ import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.stats.ComputeMinMax;
 import net.imglib2.converter.Converter;
-import net.imglib2.converter.Converters;
 import net.imglib2.converter.RealLUTConverter;
 import net.imglib2.display.projector.composite.CompositeXYProjector;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.cell.AbstractCellImg;
-import net.imglib2.type.Type;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Util;
 import net.imglib2.view.IterableRandomAccessibleInterval;
 import net.imglib2.view.Views;
 
-import org.scijava.Context;
 import org.scijava.android.AndroidService;
-import org.scijava.android.ui.viewer.AndroidDisplayPanel;
+import org.scijava.android.ui.viewer.AbstractAndroidDisplayPanel;
 import org.scijava.android.ui.viewer.AndroidViewHolder;
+import org.scijava.android.ui.viewer.Shareable;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.thread.ThreadService;
@@ -43,8 +43,9 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class AndroidRandomAccessibleDisplayPanel implements RandomAccessibleIntervalDisplayPanel, AndroidDisplayPanel<ImageView> {
-	private final AndroidRandomAccessibleIntervalDisplay display;
+public class AndroidRandomAccessibleDisplayPanel extends AbstractAndroidDisplayPanel<ImageView> implements Shareable {
+	private static final int MY_PERMISSIONS_REQUEST = 234;
+	private final RandomAccessibleIntervalDisplay display;
 	private final DisplayWindow window;
 
 	@Parameter
@@ -56,8 +57,9 @@ public class AndroidRandomAccessibleDisplayPanel implements RandomAccessibleInte
 	@Parameter
 	private AndroidService androidService;
 	private AndroidViewHolder<ImageView> holder;
+	private WeakReference<Bitmap> bitmapReference;
 
-	public AndroidRandomAccessibleDisplayPanel(AndroidRandomAccessibleIntervalDisplay display, DisplayWindow window) {
+	public AndroidRandomAccessibleDisplayPanel(RandomAccessibleIntervalDisplay display, DisplayWindow window) {
 		display.context().inject(this);
 		this.display = display;
 		this.window = window;
@@ -87,15 +89,21 @@ public class AndroidRandomAccessibleDisplayPanel implements RandomAccessibleInte
 	}
 
 	@Override
-	public void redraw() {
-
+	public void updateContent() {
 		if(holder == null) return;
-		Handler handler = new BitmapHandler(this, holder.getItem());
+		Handler handler = new BitmapHandler(this);
+		if(bitmapReference != null) bitmapReference.clear();
 		new Thread(() -> {
-			Bitmap bitmap = toBufferedImage(display.getActiveRAI());
+			Bitmap bitmap = toBufferedImage(display.get(0));
 			Message msg = Message.obtain(handler, 0, bitmap);
 			handler.sendMessage(msg);
 		}).start();
+	}
+
+	@Override
+	public void updateView(ImageView view) {
+		if(bitmapReference == null) return;
+		view.setImageBitmap(bitmapReference.get());
 	}
 
 	@Override
@@ -112,6 +120,11 @@ public class AndroidRandomAccessibleDisplayPanel implements RandomAccessibleInte
 	@Override
 	public void attach(AndroidViewHolder<ImageView> holder) {
 		this.holder = holder;
+		if(bitmapReference != null && bitmapReference.get() != null) {
+			holder.getItem().setImageBitmap(bitmapReference.get());
+		} else {
+			updateContent();
+		}
 	}
 
 	@Override
@@ -119,22 +132,49 @@ public class AndroidRandomAccessibleDisplayPanel implements RandomAccessibleInte
 		this.holder = null;
 	}
 
+	@Override
+	public void share(Activity activity) {
+		if (activity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+				!= PackageManager.PERMISSION_GRANTED) {
+
+			// Should we show an explanation?
+			if (activity.shouldShowRequestPermissionRationale(
+					Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+				// Explain to the user why we need to read the contacts
+			}
+
+			activity.requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+					MY_PERMISSIONS_REQUEST);
+
+			return;
+		}
+		String path = MediaStore.Images.Media.insertImage(activity.getContentResolver(), bitmapReference.get(), getLabel(), null);
+		Uri uri = Uri.parse(path);
+		Intent intent = new Intent(Intent.ACTION_SEND);
+		intent.setType("image/png");
+		intent.putExtra(Intent.EXTRA_STREAM, uri);
+		Intent shareIntent = Intent.createChooser(intent, "Share " + getLabel());
+		activity.startActivity(shareIntent);
+	}
+
 	static class BitmapHandler extends Handler {
 		private final WeakReference<AndroidRandomAccessibleDisplayPanel> panel;
-		private final WeakReference<ImageView> content;
 
-		public BitmapHandler(AndroidRandomAccessibleDisplayPanel panel, ImageView content) {
+		public BitmapHandler(AndroidRandomAccessibleDisplayPanel panel) {
 			this.panel = new WeakReference<>(panel);
-			this.content = new WeakReference<>(content);
 		}
 		@Override
 		public void handleMessage(Message msg){
-			panel.get().redraw((Bitmap) msg.obj, content.get());
+			panel.get().redraw((Bitmap) msg.obj);
 		}
 	}
 
-	private void redraw(Bitmap bitmap, ImageView content) {
-		threadService.queue(() -> content.setImageBitmap(bitmap));
+	private void redraw(Bitmap bitmap) {
+		bitmapReference = new WeakReference<>(bitmap);
+		if(holder == null) return;
+//		threadService.queue(() -> {
+			if(holder.getItem() != null && holder.input == this) holder.getItem().setImageBitmap(bitmap);
+//		});
 	}
 
 	private <T extends RealType<T>, U> Bitmap toBufferedImage(RandomAccessibleInterval<U> img) {

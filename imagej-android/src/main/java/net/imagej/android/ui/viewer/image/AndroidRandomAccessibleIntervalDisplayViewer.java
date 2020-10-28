@@ -32,10 +32,8 @@ package net.imagej.android.ui.viewer.image;
 
 import net.imglib2.RandomAccessibleInterval;
 
-import org.scijava.android.AndroidService;
 import org.scijava.android.ui.AndroidUI;
 import org.scijava.display.Display;
-import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.ui.UserInterface;
 import org.scijava.ui.viewer.AbstractDisplayViewer;
@@ -57,7 +55,7 @@ public class AndroidRandomAccessibleIntervalDisplayViewer extends AbstractDispla
 
 	@Override
 	public boolean canView(Display<?> d) {
-		return d instanceof AndroidRandomAccessibleIntervalDisplay;
+		return d instanceof RandomAccessibleIntervalDisplay;
 	}
 
 	@Override
@@ -67,7 +65,7 @@ public class AndroidRandomAccessibleIntervalDisplayViewer extends AbstractDispla
 	}
 
 	@Override
-	public AndroidRandomAccessibleIntervalDisplay getDisplay() {
-		return (AndroidRandomAccessibleIntervalDisplay) super.getDisplay();
+	public RandomAccessibleIntervalDisplay getDisplay() {
+		return (RandomAccessibleIntervalDisplay) super.getDisplay();
 	}
 }

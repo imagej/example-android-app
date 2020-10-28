@@ -34,6 +34,7 @@ import org.scijava.Context;
 import org.scijava.android.AndroidService;
 import org.scijava.android.R;
 import org.scijava.android.ui.viewer.AndroidDisplayPanel;
+import org.scijava.android.ui.viewer.AndroidDisplayViewerWindow;
 import org.scijava.android.ui.viewer.AndroidDisplayWindow;
 import org.scijava.android.ui.viewer.ViewAdapter;
 import org.scijava.android.ui.viewer.WindowViewAdapterBuilder;
@@ -128,7 +129,7 @@ public class DefaultAndroidUI extends AbstractUserInterface implements
 		if(display instanceof ModuleDisplay) {
 			return new AndroidDisplayWindow(display, controlAdapter);
 		} else {
-			return new AndroidDisplayWindow(display, viewAdapter);
+			return new AndroidDisplayViewerWindow(display, viewAdapter, androidService.getActivity());
 		}
 	}
 

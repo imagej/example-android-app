@@ -42,20 +42,28 @@ public interface AndroidDataView<W extends View>
 {
 
 	W createView(ViewGroup parent);
-
 	Class<W> getWidgetType();
 
 	void attach(AndroidViewHolder<W> holder);
-
 	void detach(AndroidViewHolder<W> holder);
 
-	default AndroidViewHolderBuilder getViewHolderBuilder() {
-		return (parent, content) -> new AndroidViewHolder<>(parent, content, createView(content));
+	default AndroidViewHolderBuilder getViewHolderBuilder(ViewAdapter adapter) {
+		return (parent, content) -> new AndroidViewHolder<>(adapter, parent, content, createView(content));
 	}
+	AndroidViewHolder<W> getViewHolder();
 
-	void update();
+	default void redraw() {
+		updateContent();
+		if(getViewHolder() != null) updateView(getViewHolder().getItem());
+	}
+	default void updateHolder() {
+		if(getViewHolder() == null) return;
+		W item = getViewHolder().getItem();
+		updateView(item);
+	}
+	void updateContent();
+	void updateView(W item);
 
 	boolean isLabeled();
-
 	String getLabel();
 }

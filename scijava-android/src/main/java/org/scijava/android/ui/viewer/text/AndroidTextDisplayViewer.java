@@ -30,10 +30,8 @@
 
 package org.scijava.android.ui.viewer.text;
 
-import org.scijava.android.AndroidService;
 import org.scijava.android.ui.AndroidUI;
 import org.scijava.display.Display;
-import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.ui.UserInterface;
 import org.scijava.ui.viewer.DisplayViewer;
@@ -48,9 +46,6 @@ import org.scijava.ui.viewer.text.AbstractTextDisplayViewer;
 @Plugin(type = DisplayViewer.class)
 public class AndroidTextDisplayViewer extends AbstractTextDisplayViewer {
 
-	@Parameter
-	private AndroidService androidService;
-
 	@Override
 	public boolean isCompatible(final UserInterface ui) {
 		return ui instanceof AndroidUI;
@@ -59,6 +54,6 @@ public class AndroidTextDisplayViewer extends AbstractTextDisplayViewer {
 	@Override
 	public void view(final DisplayWindow w, final Display<?> d) {
 		super.view(w, d);
-		setPanel(new AndroidTextDisplayPanel(getDisplay(), w, androidService.getActivity()));
+		setPanel(new AndroidTextDisplayPanel(getDisplay(), w));
 	}
 }

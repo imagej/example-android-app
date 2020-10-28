@@ -1,6 +1,5 @@
 package org.scijava.android.ui.widget;
 
-import android.app.Activity;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -13,10 +12,8 @@ import org.scijava.android.AndroidService;
 import org.scijava.android.R;
 import org.scijava.android.ui.viewer.AndroidDisplayPanel;
 import org.scijava.android.ui.viewer.AndroidViewHolder;
-import org.scijava.android.ui.viewer.module.DefaultModuleDisplay;
 import org.scijava.display.Display;
 import org.scijava.plugin.Parameter;
-import org.scijava.ui.viewer.DisplayPanel;
 import org.scijava.ui.viewer.DisplayWindow;
 import org.scijava.widget.AbstractInputPanel;
 import org.scijava.widget.InputWidget;
@@ -31,9 +28,10 @@ public class AndroidInputPanel extends AbstractInputPanel<RecyclerView, View> im
 
     private final ViewGroup parent;
     private ModuleInputsAdapter adapter;
-    private Display display;
+    private Display<?> display;
     private DisplayWindow window;
     private String label;
+    private AndroidViewHolder<RecyclerView> holder;
 
     public AndroidInputPanel(Context context) {
         setContext(context);
@@ -82,12 +80,7 @@ public class AndroidInputPanel extends AbstractInputPanel<RecyclerView, View> im
         label = s;
     }
 
-    @Override
-    public void redraw() {
-
-    }
-
-    public void setDisplay(Display display) {
+    public void setDisplay(Display<?> display) {
         this.display = display;
     }
 
@@ -103,17 +96,33 @@ public class AndroidInputPanel extends AbstractInputPanel<RecyclerView, View> im
     }
 
     @Override
-    public Class getWidgetType() {
+    public Class<RecyclerView> getWidgetType() {
         return RecyclerView.class;
     }
 
     @Override
     public void attach(AndroidViewHolder<RecyclerView> holder) {
+        this.holder = holder;
         holder.getItem().setAdapter(adapter);
     }
 
     @Override
-    public void detach(AndroidViewHolder holder) {
+    public AndroidViewHolder<RecyclerView> getViewHolder() {
+        return holder;
+    }
+
+    @Override
+    public void updateContent() {
+    }
+
+    @Override
+    public void updateView(RecyclerView item) {
+
+    }
+
+    @Override
+    public void detach(AndroidViewHolder<RecyclerView> holder) {
+        this.holder = null;
         // seems I can't detach the adapter ..
     }
 

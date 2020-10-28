@@ -14,24 +14,34 @@ import org.scijava.android.R;
  *
  * @author Deborah Schmidt
  */
-public class AndroidViewHolder<W extends View> extends RecyclerView.ViewHolder {
-	public TextView labelView;
+public class AndroidViewHolder<W extends View> extends RecyclerView.ViewHolder implements View.OnClickListener {
+	public final TextView labelView;
+	public final ViewGroup content;
 	private final W item;
+	private final ViewAdapter adapter;
 	public AndroidDataView<?> input;
 
-	public AndroidViewHolder(ViewGroup parent, ViewGroup content, W item) {
+	public AndroidViewHolder(ViewAdapter adapter, ViewGroup parent, ViewGroup content, W item) {
 		super(parent);
 		this.item = item;
+		this.adapter = adapter;
+		this.content = content;
 		labelView = parent.findViewById(R.id.title);
 		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-				ViewGroup.LayoutParams.MATCH_PARENT, 0);
-		params.weight = 1.0f;
+				ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 		item.setLayoutParams(params);
+		content.removeAllViews();
 		content.addView(item);
-		content.refreshDrawableState();
+		parent.setOnClickListener(this);
 	}
 
 	public W getItem() {
 		return item;
+	}
+
+	@Override
+	public void onClick(View v) {
+		int position = getAdapterPosition();
+		adapter.onItemClick(position);
 	}
 }

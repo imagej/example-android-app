@@ -55,7 +55,6 @@ public class AndroidButtonWidget extends AndroidInputWidget<org.scijava.widget.B
 
 	@Parameter
 	private AndroidService androidService;
-	private AndroidViewHolder<Button> holder;
 
 	// -- InputWidget methods --
 
@@ -87,9 +86,8 @@ public class AndroidButtonWidget extends AndroidInputWidget<org.scijava.widget.B
 
 	@Override
 	public void doRefresh() {
-		// maybe dialog owner changed name of button
-		if(holder != null) {
-			holder.getItem().setText(get().getWidgetLabel());
+		if(getViewHolder() != null) {
+			getViewHolder().getItem().setText(get().getWidgetLabel());
 		}
 	}
 
@@ -110,9 +108,8 @@ public class AndroidButtonWidget extends AndroidInputWidget<org.scijava.widget.B
 
 	@Override
 	public void attach(AndroidViewHolder<Button> holder) {
-		this.holder = holder;
+		super.attach(holder);
 		Button button = holder.getItem();
-		button.setText(get().getWidgetLabel());
 		button.setOnClickListener((view) -> {
 			get().callback();
 			get().getPanel().refresh();
@@ -120,7 +117,12 @@ public class AndroidButtonWidget extends AndroidInputWidget<org.scijava.widget.B
 	}
 
 	@Override
-	public void detach(AndroidViewHolder<Button> holder) {
-		this.holder = null;
+	public void updateContent() {
 	}
+
+	@Override
+	public void updateView(Button item) {
+		item.setText(get().getWidgetLabel());
+	}
+
 }

@@ -1,4 +1,4 @@
-package org.scijava.android.ui.viewer;
+package org.scijava.android.ui.viewer.recyclable;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +14,12 @@ import org.scijava.Context;
 import org.scijava.Contextual;
 import org.scijava.android.AndroidService;
 import org.scijava.android.R;
+import org.scijava.android.ui.viewer.AndroidDataView;
+import org.scijava.android.ui.viewer.RecyclableWindow;
 import org.scijava.convert.ConvertService;
+import org.scijava.display.event.DisplayUpdatedEvent;
+import org.scijava.event.EventHandler;
+import org.scijava.event.EventService;
 import org.scijava.log.LogService;
 import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
@@ -23,7 +28,7 @@ import org.scijava.widget.WidgetService;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ViewAdapter<T extends AndroidDataView<?>> extends RecyclerView.Adapter<AndroidViewHolder<?>> implements Contextual {
+public class RecyclableDataViewAdapter<T extends RecyclableDataView<?>> extends RecyclerView.Adapter<LabeledViewHolder<?>> implements Contextual {
 
     @Parameter
     private WidgetService widgetService;
@@ -46,12 +51,13 @@ public class ViewAdapter<T extends AndroidDataView<?>> extends RecyclerView.Adap
     private final ObservableList<T> items;
 
     private final List<Class<? extends View>> viewTypes;
-    private final List<AndroidViewHolderBuilder> viewHolderBuilder;
+    private final List<LabeledViewHolderBuilder<? extends View>> viewHolderBuilder;
     private final int adapterLayout;
 
-    private ListItemClickListener onClickListener;
+    private ItemClickListener onClickListener;
+    private RecyclerView view;
 
-    public ViewAdapter(Context context, int adapterLayout) {
+    public RecyclableDataViewAdapter(Context context, int adapterLayout) {
         setContext(context);
         this.adapterLayout = adapterLayout;
         items = new ObservableArrayList<>();
@@ -66,7 +72,7 @@ public class ViewAdapter<T extends AndroidDataView<?>> extends RecyclerView.Adap
 
     @Override
     public int getItemViewType(int position) {
-        Class<? extends View> componentType = items.get(position).getWidgetType();
+        Class<? extends View> componentType = items.get(position).getViewType();
         for (int i = 0; i < viewTypes.size(); i++) {
             if (componentType.equals(viewTypes.get(i))) return i;
         }
@@ -78,19 +84,18 @@ public class ViewAdapter<T extends AndroidDataView<?>> extends RecyclerView.Adap
 
     @NonNull
     @Override
-    public AndroidViewHolder<?> onCreateViewHolder(ViewGroup parent, int viewType) {
+    public LabeledViewHolder<? extends View> onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(androidService.getActivity());
         ViewGroup parentView = (ViewGroup) inflater.inflate(adapterLayout, parent, false);
         ViewGroup contentView = parentView.findViewById(R.id.content);
         return viewHolderBuilder.get(viewType).apply(parentView, contentView);
     }
     @Override
-    public void onBindViewHolder(final AndroidViewHolder holder, final int position) {
-        System.out.println("holder bound: " + holder.getAdapterPosition());
+    public void onBindViewHolder(final LabeledViewHolder holder, final int position) {
         T item = items.get(position);
-        holder.input = item;
+        holder.setInput(item);
         item.attach(holder);
-        TextView textView = holder.labelView;
+        TextView textView = holder.getLabelView();
         if (item.isLabeled()) {
             textView.setText(item.getLabel());
             textView.setVisibility(View.VISIBLE);
@@ -101,18 +106,16 @@ public class ViewAdapter<T extends AndroidDataView<?>> extends RecyclerView.Adap
     }
 
     @Override
-    public void onViewRecycled(@NonNull AndroidViewHolder<?> holder) {
-//        System.out.println("View recycled: " + holder.getAdapterPosition());
+    public void onViewRecycled(@NonNull LabeledViewHolder<?> holder) {
         super.onViewRecycled(holder);
-        AndroidDataView item = holder.input;
+        RecyclableDataView item = holder.getInput();
         if(item != null) {
             item.detach(holder);
-            holder.input = null;
+            holder.setInput(null);
         }
     }
 
     public void removeItem(int position) {
-        System.out.println("REMOVE ITEM " + position);
         items.remove(position);
     }
 
@@ -141,12 +144,21 @@ public class ViewAdapter<T extends AndroidDataView<?>> extends RecyclerView.Adap
         return context;
     }
 
-    public void setOnClickListener(ListItemClickListener onClickListener) {
+    public void setOnClickListener(ItemClickListener onClickListener) {
         this.onClickListener = onClickListener;
     }
 
-    public <W extends View> void onItemClick(int position) {
+    public void onItemClick(int position) {
         if(onClickListener != null) onClickListener.onItemClick(items.get(position));
+    }
+
+    public void focus(T item) {
+        if(view == null) return;
+        view.smoothScrollToPosition(items.indexOf(item));
+    }
+
+    public void setView(RecyclerView view) {
+        this.view = view;
     }
 
     private class ObservableListCallback extends  ObservableList.OnListChangedCallback<ObservableList<T>>{
@@ -174,16 +186,12 @@ public class ViewAdapter<T extends AndroidDataView<?>> extends RecyclerView.Adap
 
         @Override
         public void onItemRangeRemoved(ObservableList<T> sender, int positionStart, int itemCount) {
-            System.out.println("ON ITEM RANGE REMOVED " + positionStart + " " + itemCount);
-//            notifyItemRemoved(positionStart);
             notifyItemRangeRemoved(positionStart, itemCount);
         }
 
     }
 
-    interface ListItemClickListener{
-
+    public interface ItemClickListener {
         void onItemClick(AndroidDataView<? extends View> item);
-
     }
 }

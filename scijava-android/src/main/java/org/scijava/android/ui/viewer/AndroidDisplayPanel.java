@@ -2,12 +2,20 @@ package org.scijava.android.ui.viewer;
 
 import android.view.View;
 
+import org.scijava.android.ui.viewer.recyclable.RecyclableDataView;
 import org.scijava.ui.viewer.DisplayPanel;
 
-public interface AndroidDisplayPanel<W extends View> extends DisplayPanel, AndroidDataView<W> {
+/**
+ * An Android panel for displaying data
+ *
+ * @author Deborah Schmidt
+ * @param <W> the type of {@link View} housing the panel
+ */
+public interface AndroidDisplayPanel<W extends View> extends DisplayPanel, RecyclableDataView<W> {
 
     default void redraw() {
-        AndroidDataView.super.redraw();
+        contentUpdated();
+        if(getViewHolder() != null) updateView(getViewHolder().getItem());
     }
 
 }

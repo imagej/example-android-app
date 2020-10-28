@@ -17,8 +17,9 @@ import java.util.WeakHashMap;
 
 /*
  * Interactive command being able to update the display of an output by setting the output
+ * FIXME this is just a hacky solution, needs to be done properly.
  */
-public class InteractiveCommandDisplayUpdate extends InteractiveCommand {
+public class DisplayUpdatingInteractiveCommand extends InteractiveCommand {
 
     WeakHashMap<String, Display> outputDisplays = new WeakHashMap<>();
 

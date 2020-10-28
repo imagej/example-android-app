@@ -28,68 +28,48 @@
  * #L%
  */
 
-package org.scijava.android.ui.widget;
+package org.scijava.android.ui.viewer.recyclable;
 
 import android.view.View;
 
-import com.google.android.material.slider.Slider;
-
-import org.scijava.android.ui.AndroidUI;
 import org.scijava.android.ui.viewer.AndroidDataView;
-import org.scijava.android.ui.viewer.AndroidViewHolder;
-import org.scijava.ui.AbstractUIInputWidget;
-import org.scijava.ui.UserInterface;
 
 /**
- * Common superclass for Android-based input widgets.
- *
- * @param <T> The input type of the widget.
- * @param <W> The type of UI component housing the widget.
+ * Common interface for Android-based data views.
  *
  * @author Deborah Schmidt
  */
-public abstract class AndroidInputWidget<T, W extends View> extends
-	AbstractUIInputWidget<T, View> implements AndroidDataView<W> {
+public interface RecyclableDataView<W extends View> extends AndroidDataView<W>
+{
 
-	private AndroidViewHolder<W> holder;
+	/**
+	 * Attach this view to an existing holder (e.g. attach listeners)
+	 */
+	void attach(LabeledViewHolder<W> holder);
 
-	@Override
-	protected UserInterface ui() {
-		return ui(AndroidUI.NAME);
+	/**
+	 * Detach this view from an existing holder (e.g. detach listeners)
+	 */
+	void detach(LabeledViewHolder<W> holder);
+
+	/**
+	 * Provide method for building a holder matching this data view.
+	 */
+	default LabeledViewHolderBuilder<W> getViewHolderBuilder(RecyclableDataViewAdapter adapter) {
+		return (parent, content) -> new LabeledViewHolder<>(adapter, parent, content, createView(content));
 	}
 
-	@Override
-	public W getComponent() {
-		// since we are using RecyclerViews, there is no fixed component associated with a widget
-		return null;
-	}
-	@Override
-	public Class<View> getComponentType() {
-		return View.class;
-	}
+	/**
+	 * @return the holder currently attached to this view.
+	 */
+	LabeledViewHolder<W> getViewHolder();
 
-	@Override
-	public boolean isLabeled() {
-		return super.isLabeled();
-	}
-
-	@Override
-	public String getLabel() {
-		return get().getWidgetLabel();
-	}
-
-	@Override
-	public void attach(AndroidViewHolder<W> holder) {
-		this.holder = holder;
-	}
-
-	@Override
-	public void detach(AndroidViewHolder<W> holder) {
-		this.holder = null;
-	}
-
-	@Override
-	public AndroidViewHolder<W> getViewHolder() {
-		return holder;
+	/**
+	 * Update the currently attached holder based on the data of this view.
+	 */
+	default void updateHolder() {
+		if(getViewHolder() == null) return;
+		W item = getViewHolder().getItem();
+		updateView(item);
 	}
 }

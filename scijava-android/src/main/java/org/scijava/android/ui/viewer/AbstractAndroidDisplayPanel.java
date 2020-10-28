@@ -2,7 +2,9 @@ package org.scijava.android.ui.viewer;
 
 import android.view.View;
 
-public abstract class AbstractAndroidDisplayPanel<W extends View>  extends AbstractAndroidDataView<W> implements AndroidDisplayPanel<W> {
+import org.scijava.android.ui.viewer.recyclable.AbstractRecyclableDataView;
+
+public abstract class AbstractAndroidDisplayPanel<W extends View>  extends AbstractRecyclableDataView<W> implements AndroidDisplayPanel<W> {
 
     @Override
     public void redoLayout() {

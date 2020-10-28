@@ -16,6 +16,11 @@ import org.scijava.display.TextDisplay;
 import org.scijava.ui.viewer.DisplayWindow;
 import org.scijava.ui.viewer.text.TextDisplayPanel;
 
+/**
+ * Android panel to display texts
+ *
+ * @author Deborah Schmidt
+ */
 public class AndroidTextDisplayPanel extends AbstractAndroidDisplayPanel<TextView> implements TextDisplayPanel, Shareable {
 	private final TextDisplay display;
 	private final DisplayWindow window;
@@ -52,7 +57,7 @@ public class AndroidTextDisplayPanel extends AbstractAndroidDisplayPanel<TextVie
 	}
 
 	@Override
-	public void updateContent() {
+	public void contentUpdated() {
 		displayText = display.get(display.size()-1);
 	}
 
@@ -60,7 +65,7 @@ public class AndroidTextDisplayPanel extends AbstractAndroidDisplayPanel<TextVie
 	public void updateView(TextView item) {
 		final boolean html = displayText.startsWith("<html>");
 		if(html) {
-			item.setText(Html.fromHtml(displayText));
+			item.setText(Html.fromHtml(displayText, Html.FROM_HTML_MODE_COMPACT));
 		} else {
 			item.setText(displayText);
 			long lineCount = displayText.chars().filter(ch -> ch == '\n').count()+1;
@@ -79,7 +84,7 @@ public class AndroidTextDisplayPanel extends AbstractAndroidDisplayPanel<TextVie
 	}
 
 	@Override
-	public Class<TextView> getWidgetType() {
+	public Class<TextView> getViewType() {
 		return TextView.class;
 	}
 

@@ -34,10 +34,10 @@ import org.scijava.Context;
 import org.scijava.android.AndroidService;
 import org.scijava.android.R;
 import org.scijava.android.ui.viewer.AndroidDisplayPanel;
-import org.scijava.android.ui.viewer.AndroidDisplayViewerWindow;
-import org.scijava.android.ui.viewer.AndroidDisplayWindow;
-import org.scijava.android.ui.viewer.ViewAdapter;
-import org.scijava.android.ui.viewer.WindowViewAdapterBuilder;
+import org.scijava.android.ui.viewer.ExpandableWindow;
+import org.scijava.android.ui.viewer.RecyclableWindow;
+import org.scijava.android.ui.viewer.recyclable.RecyclableDataViewAdapter;
+import org.scijava.android.ui.viewer.recyclable.AdapterBuilder;
 import org.scijava.android.ui.viewer.module.ModuleDisplay;
 import org.scijava.app.AppService;
 import org.scijava.display.Display;
@@ -94,8 +94,8 @@ public class DefaultAndroidUI extends AbstractUserInterface implements
 	private AndroidConsolePane consolePane;
 	private AndroidClipboard systemClipboard;
 
-	private ViewAdapter<AndroidDisplayPanel<?>> viewAdapter;
-	private ViewAdapter<AndroidDisplayPanel<?>> controlAdapter;
+	private RecyclableDataViewAdapter<AndroidDisplayPanel<?>> viewAdapter;
+	private RecyclableDataViewAdapter<AndroidDisplayPanel<?>> controlAdapter;
 
 	// -- UserInterface methods --
 
@@ -127,9 +127,9 @@ public class DefaultAndroidUI extends AbstractUserInterface implements
 	@Override
 	public DisplayWindow createDisplayWindow(Display<?> display) {
 		if(display instanceof ModuleDisplay) {
-			return new AndroidDisplayWindow(display, controlAdapter);
+			return new RecyclableWindow(display, controlAdapter);
 		} else {
-			return new AndroidDisplayViewerWindow(display, viewAdapter, androidService.getActivity());
+			return new ExpandableWindow(display, viewAdapter, androidService.getActivity());
 		}
 	}
 
@@ -152,8 +152,8 @@ public class DefaultAndroidUI extends AbstractUserInterface implements
 	@EventHandler
 	private void initAdapters(final org.scijava.ui.event.UIShownEvent e) {
 		threadService.queue(() -> {
-			viewAdapter = WindowViewAdapterBuilder.build(androidService, getContext(), R.id.scijava_view, R.layout.scijava_view_window);
-			controlAdapter = WindowViewAdapterBuilder.build(androidService, getContext(), R.id.scijava_control, R.layout.scijava_control_window);
+			viewAdapter = AdapterBuilder.build(androidService, getContext(), R.id.scijava_view, R.layout.scijava_view_window);
+			controlAdapter = AdapterBuilder.build(androidService, getContext(), R.id.scijava_control, R.layout.scijava_control_window);
 		});
 	}
 

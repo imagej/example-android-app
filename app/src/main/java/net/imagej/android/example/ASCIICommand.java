@@ -8,20 +8,14 @@ import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.view.Views;
 
-import org.scijava.InstantiableException;
-import org.scijava.ItemIO;
-import org.scijava.android.command.InteractiveCommandDisplayUpdate;
+import org.scijava.android.command.DisplayUpdatingInteractiveCommand;
 import org.scijava.command.Command;
-import org.scijava.display.DisplayPostprocessor;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import org.scijava.plugin.PluginInfo;
-import org.scijava.plugin.PluginService;
-import org.scijava.plugin.SciJavaPlugin;
 
 @Plugin(type = Command.class, name = "ASCII converter")
-public class ASCIICommand extends InteractiveCommandDisplayUpdate {
+public class ASCIICommand extends DisplayUpdatingInteractiveCommand {
 
     @Parameter
     private RandomAccessibleInterval<ARGBType> input;
@@ -30,44 +24,22 @@ public class ASCIICommand extends InteractiveCommandDisplayUpdate {
     private float scale = 0.1f;
 
     @Parameter
-    private OpService opService;
+    private OpService ops;
 
     @Parameter
-    private LogService logService;
-
-    @Parameter(type = ItemIO.OUTPUT)
-    private RandomAccessibleInterval<UnsignedByteType> slice;
-
-    @Parameter(type = ItemIO.OUTPUT)
-    private String ascii;
+    private LogService log;
 
     @Override
     public void run() {
         if(input == null) {
-            logService.error("Input image missing");
+            log.error("Input image missing");
             return;
         }
-        RandomAccessibleInterval<UnsignedByteType> slice = convertGray(input);
-        setOutput("slice", slice);
-        RandomAccessibleInterval<UnsignedByteType> gray = ImgLibUtils.scale(slice, scale);
-        String ascii = opService.image().ascii(Views.iterable(gray));
+        RandomAccessibleInterval<UnsignedByteType> gray = Converters.argbChannel(input, 2);
+        setOutput("gray", gray);
+        gray = ImgLibUtils.scale(gray, scale);
+        String ascii = ops.image().ascii(Views.iterable(gray));
         setOutput("ascii", ascii);
         saveInputs();
-    }
-
-    @Override
-    public void setOutput(String _name, Object value) {
-        if(!getOutputs().containsKey(_name)) {
-            super.addOutput(_name, value.getClass());
-        }
-        super.setOutput(_name, value);
-    }
-
-    private RandomAccessibleInterval<UnsignedByteType> convertGray(RandomAccessibleInterval<ARGBType> img) {
-        return Converters.argbChannel( img, 2 );
-    }
-
-    public void setInput(RandomAccessibleInterval<ARGBType> img) {
-        input = img;
     }
 }

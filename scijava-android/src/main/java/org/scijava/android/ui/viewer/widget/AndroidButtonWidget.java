@@ -28,14 +28,14 @@
  * #L%
  */
 
-package org.scijava.android.ui.widget;
+package org.scijava.android.ui.viewer.widget;
 
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
 import org.scijava.android.AndroidService;
-import org.scijava.android.ui.viewer.AndroidViewHolder;
+import org.scijava.android.ui.viewer.recyclable.LabeledViewHolder;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.widget.ButtonWidget;
@@ -102,12 +102,12 @@ public class AndroidButtonWidget extends AndroidInputWidget<org.scijava.widget.B
 	}
 
 	@Override
-	public Class getWidgetType() {
+	public Class getViewType() {
 		return Button.class;
 	}
 
 	@Override
-	public void attach(AndroidViewHolder<Button> holder) {
+	public void attach(LabeledViewHolder<Button> holder) {
 		super.attach(holder);
 		Button button = holder.getItem();
 		button.setOnClickListener((view) -> {
@@ -117,7 +117,7 @@ public class AndroidButtonWidget extends AndroidInputWidget<org.scijava.widget.B
 	}
 
 	@Override
-	public void updateContent() {
+	public void contentUpdated() {
 	}
 
 	@Override

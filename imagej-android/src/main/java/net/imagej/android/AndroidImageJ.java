@@ -44,12 +44,12 @@ import org.scijava.plugin.Plugin;
  * @author Deborah Schmidt
  */
 @Plugin(type = Gateway.class)
-public class AndroidImageJGateway extends AndroidGateway {
+public class AndroidImageJ extends AndroidGateway {
 
 	/**
 	 * Creates a new ImageJ Android application context.
 	 */
-	public AndroidImageJGateway(Activity activity) {
+	public AndroidImageJ(Activity activity) {
 		super(activity);
 	}
 
@@ -58,7 +58,7 @@ public class AndroidImageJGateway extends AndroidGateway {
 	 * 
 	 * @see Context
 	 */
-	public AndroidImageJGateway(final Context context, Activity activity) {
+	public AndroidImageJ(final Context context, Activity activity) {
 		super(context, activity);
 		activity.setTheme(R.style.Theme_ImageJ_Default);
 	}

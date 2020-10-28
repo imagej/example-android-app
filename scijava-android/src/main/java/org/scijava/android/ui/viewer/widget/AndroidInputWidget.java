@@ -2,17 +2,18 @@
  * #%L
  * SciJava UI components for Java Swing.
  * %%
- * Copyright (C) 2010 - 2020 SciJava developers.
+ * Copyright (C) 2010 - 2017 Board of Regents of the University of
+ * Wisconsin-Madison.
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * 
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -27,82 +28,67 @@
  * #L%
  */
 
-package org.scijava.android.ui.viewer;
+package org.scijava.android.ui.viewer.widget;
 
 import android.view.View;
 
-import org.scijava.android.ui.viewer.AndroidDisplayPanel;
-import org.scijava.android.ui.viewer.ViewAdapter;
-import org.scijava.display.Display;
-import org.scijava.display.event.DisplayUpdatedEvent;
-import org.scijava.event.EventHandler;
-import org.scijava.ui.viewer.DisplayPanel;
-import org.scijava.ui.viewer.DisplayWindow;
+import org.scijava.android.ui.AndroidUI;
+import org.scijava.android.ui.viewer.recyclable.LabeledViewHolder;
+import org.scijava.android.ui.viewer.recyclable.RecyclableDataView;
+import org.scijava.ui.AbstractUIInputWidget;
+import org.scijava.ui.UserInterface;
 
 /**
- * Android class implementation of the {@link DisplayWindow} interface.
+ * Common superclass for Android-based input widgets.
+ *
+ * @param <T> The input type of the widget.
+ * @param <W> The type of UI component housing the widget.
  *
  * @author Deborah Schmidt
  */
-public class AndroidDisplayWindow<T, W extends View> implements DisplayWindow {
+public abstract class AndroidInputWidget<T, W extends View> extends
+	AbstractUIInputWidget<T, View> implements RecyclableDataView<W> {
 
-	private final Display<T> display;
-	private final ViewAdapter<AndroidDisplayPanel<W>> adapter;
-	private String title;
-	private AndroidDisplayPanel<W> panel;
-
-	public AndroidDisplayWindow(Display<T> display, ViewAdapter<AndroidDisplayPanel<W>> adapter) {
-		this.display = display;
-		this.adapter = adapter;
-	}
-
-	// -- DisplayWindow methods --
+	private LabeledViewHolder<W> holder;
 
 	@Override
-	public void setTitle(String s) {
-		title = s;
+	protected UserInterface ui() {
+		return ui(AndroidUI.NAME);
 	}
 
 	@Override
-	public void setContent(final DisplayPanel panel) {
-		this.panel = (AndroidDisplayPanel<W>)panel;
+	public W getComponent() {
+		// since we are using RecyclerViews, there is no fixed component associated with a widget
+		return null;
+	}
+	@Override
+	public Class<View> getComponentType() {
+		return View.class;
 	}
 
 	@Override
-	public void pack() {
+	public boolean isLabeled() {
+		return super.isLabeled();
 	}
 
 	@Override
-	public void showDisplay(final boolean visible) {
-		adapter.showItem(panel, visible);
+	public String getLabel() {
+		return get().getWidgetLabel();
 	}
 
 	@Override
-	public void requestFocus() {
-		// TODO
+	public void attach(LabeledViewHolder<W> holder) {
+		this.holder = holder;
 	}
 
 	@Override
-	public void close() {
-		adapter.showItem(panel, false);
+	public void detach(LabeledViewHolder<W> holder) {
+		this.holder = null;
 	}
 
 	@Override
-	public int findDisplayContentScreenX() {
-		// TODO
-		return 0;
+	public LabeledViewHolder<W> getViewHolder() {
+		return holder;
 	}
 
-	@Override
-	public int findDisplayContentScreenY() {
-		// TODO
-		return 0;
-	}
-
-	@EventHandler
-	public void onDisplayUpdate(final DisplayUpdatedEvent e) {
-		if(e.getDisplay().equals(display)) {
-			panel.redraw();
-		}
-	}
 }

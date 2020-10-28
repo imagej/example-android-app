@@ -32,8 +32,8 @@ import net.imglib2.view.Views;
 
 import org.scijava.android.AndroidService;
 import org.scijava.android.ui.viewer.AbstractAndroidDisplayPanel;
-import org.scijava.android.ui.viewer.AndroidViewHolder;
 import org.scijava.android.ui.viewer.Shareable;
+import org.scijava.android.ui.viewer.recyclable.LabeledViewHolder;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.thread.ThreadService;
@@ -56,7 +56,8 @@ public class AndroidRandomAccessibleDisplayPanel extends AbstractAndroidDisplayP
 
 	@Parameter
 	private AndroidService androidService;
-	private AndroidViewHolder<ImageView> holder;
+
+	private LabeledViewHolder<ImageView> holder;
 	private WeakReference<Bitmap> bitmapReference;
 
 	public AndroidRandomAccessibleDisplayPanel(RandomAccessibleIntervalDisplay display, DisplayWindow window) {
@@ -89,7 +90,7 @@ public class AndroidRandomAccessibleDisplayPanel extends AbstractAndroidDisplayP
 	}
 
 	@Override
-	public void updateContent() {
+	public void contentUpdated() {
 		if(holder == null) return;
 		Handler handler = new BitmapHandler(this);
 		if(bitmapReference != null) bitmapReference.clear();
@@ -113,22 +114,22 @@ public class AndroidRandomAccessibleDisplayPanel extends AbstractAndroidDisplayP
 	}
 
 	@Override
-	public Class<ImageView> getWidgetType() {
+	public Class<ImageView> getViewType() {
 		return ImageView.class;
 	}
 
 	@Override
-	public void attach(AndroidViewHolder<ImageView> holder) {
+	public void attach(LabeledViewHolder<ImageView> holder) {
 		this.holder = holder;
 		if(bitmapReference != null && bitmapReference.get() != null) {
 			holder.getItem().setImageBitmap(bitmapReference.get());
 		} else {
-			updateContent();
+			contentUpdated();
 		}
 	}
 
 	@Override
-	public void detach(AndroidViewHolder<ImageView> holder) {
+	public void detach(LabeledViewHolder<ImageView> holder) {
 		this.holder = null;
 	}
 
@@ -173,7 +174,7 @@ public class AndroidRandomAccessibleDisplayPanel extends AbstractAndroidDisplayP
 		bitmapReference = new WeakReference<>(bitmap);
 		if(holder == null) return;
 //		threadService.queue(() -> {
-			if(holder.getItem() != null && holder.input == this) holder.getItem().setImageBitmap(bitmap);
+			if(holder.getItem() != null && holder.getInput() == this) holder.getItem().setImageBitmap(bitmap);
 //		});
 	}
 

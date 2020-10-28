@@ -30,34 +30,28 @@
 package org.scijava.android.ui.viewer;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Rect;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 
 import org.scijava.android.R;
+import org.scijava.android.ui.viewer.recyclable.RecyclableDataViewAdapter;
 import org.scijava.display.Display;
-import org.scijava.ui.viewer.DisplayWindow;
 
 /**
- * Android class implementation of the {@link DisplayWindow} interface.
+ * A {@link RecyclableWindow} which can also be expanded by clicking on it.
  *
  * @author Deborah Schmidt
  */
-public class AndroidDisplayViewerWindow<T, W extends View> extends AndroidDisplayWindow<T, W> implements ViewAdapter.ListItemClickListener {
+public class ExpandableWindow<T, W extends View> extends RecyclableWindow<T, W> implements RecyclableDataViewAdapter.ItemClickListener {
 	private final Activity activity;
-	private AlertDialog dialog;
 	private AndroidDataView<? extends View> activeItem;
 
-	public AndroidDisplayViewerWindow(Display<T> display, ViewAdapter<AndroidDisplayPanel<W>> adapter, Activity activity) {
+	public ExpandableWindow(Display<T> display, RecyclableDataViewAdapter<AndroidDisplayPanel<W>> adapter, Activity activity) {
 		super(display, adapter);
 		adapter.setOnClickListener(this);
 		this.activity = activity;
@@ -75,11 +69,13 @@ public class AndroidDisplayViewerWindow<T, W extends View> extends AndroidDispla
 		builder.setView(content);
 		if(item instanceof Shareable) {
 			builder.setPositiveButton("Share", this::onShareClick);
+//			builder.setPositiveButtonIcon(ContextCompat.getDrawable(activity, android.R.drawable.ic_menu_share));
 		}
 		builder.setNeutralButton("Close", this::onCloseClick);
+//		builder.setNeutralButtonIcon(ContextCompat.getDrawable(activity, android.R.drawable.ic_menu_close_clear_cancel));
 
 		this.activeItem = item;
-		dialog = builder.create();
+		AlertDialog dialog = builder.create();
 		dialog.show();
 
 	}

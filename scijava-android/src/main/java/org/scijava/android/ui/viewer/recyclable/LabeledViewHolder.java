@@ -1,4 +1,4 @@
-package org.scijava.android.ui.viewer;
+package org.scijava.android.ui.viewer.recyclable;
 
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,14 +14,15 @@ import org.scijava.android.R;
  *
  * @author Deborah Schmidt
  */
-public class AndroidViewHolder<W extends View> extends RecyclerView.ViewHolder implements View.OnClickListener {
-	public final TextView labelView;
-	public final ViewGroup content;
+public class LabeledViewHolder<W extends View> extends RecyclerView.ViewHolder implements View.OnClickListener {
+	private final TextView labelView;
+	private final ViewGroup content;
 	private final W item;
-	private final ViewAdapter adapter;
-	public AndroidDataView<?> input;
+	private final RecyclableDataViewAdapter<?> adapter;
 
-	public AndroidViewHolder(ViewAdapter adapter, ViewGroup parent, ViewGroup content, W item) {
+	private RecyclableDataView<W> input;
+
+	public LabeledViewHolder(RecyclableDataViewAdapter<?> adapter, ViewGroup parent, ViewGroup content, W item) {
 		super(parent);
 		this.item = item;
 		this.adapter = adapter;
@@ -43,5 +44,17 @@ public class AndroidViewHolder<W extends View> extends RecyclerView.ViewHolder i
 	public void onClick(View v) {
 		int position = getAdapterPosition();
 		adapter.onItemClick(position);
+	}
+
+	public RecyclableDataView<W> getInput() {
+		return input;
+	}
+
+	public void setInput(RecyclableDataView<W> input) {
+		this.input = input;
+	}
+
+	public TextView getLabelView() {
+		return labelView;
 	}
 }

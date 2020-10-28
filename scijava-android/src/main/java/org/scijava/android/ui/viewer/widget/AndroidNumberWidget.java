@@ -28,7 +28,7 @@
  * #L%
  */
 
-package org.scijava.android.ui.widget;
+package org.scijava.android.ui.viewer.widget;
 
 import android.view.MotionEvent;
 import android.view.View;
@@ -39,7 +39,7 @@ import androidx.annotation.NonNull;
 import com.google.android.material.slider.Slider;
 
 import org.scijava.android.AndroidService;
-import org.scijava.android.ui.viewer.AndroidViewHolder;
+import org.scijava.android.ui.viewer.recyclable.LabeledViewHolder;
 import org.scijava.log.LogService;
 import org.scijava.module.ModuleService;
 import org.scijava.plugin.Parameter;
@@ -99,12 +99,12 @@ public class AndroidNumberWidget extends AndroidInputWidget<Number, Slider> impl
 	}
 
 	@Override
-	public Class<Slider> getWidgetType() {
+	public Class<Slider> getViewType() {
 		return Slider.class;
 	}
 
 	@Override
-	public void attach(AndroidViewHolder<Slider> holder) {
+	public void attach(LabeledViewHolder<Slider> holder) {
 		super.attach(holder);
 		Slider slider = holder.getItem();
 		slider.addOnChangeListener(this);
@@ -112,7 +112,7 @@ public class AndroidNumberWidget extends AndroidInputWidget<Number, Slider> impl
 	}
 
 	@Override
-	public void detach(AndroidViewHolder<Slider> holder) {
+	public void detach(LabeledViewHolder<Slider> holder) {
 		Slider slider = holder.getItem();
 		slider.removeOnChangeListener(this);
 		slider.removeOnSliderTouchListener(this);
@@ -120,7 +120,7 @@ public class AndroidNumberWidget extends AndroidInputWidget<Number, Slider> impl
 	}
 
 	@Override
-	public void updateContent() {
+	public void contentUpdated() {
 
 	}
 

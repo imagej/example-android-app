@@ -27,7 +27,7 @@
  * #L%
  */
 
-package org.scijava.android.ui.widget;
+package org.scijava.android.ui.viewer.widget;
 
 import android.view.View;
 
@@ -66,15 +66,22 @@ public class AndroidInputHarvester extends AbstractInputHarvesterPlugin<Recycler
 								 final Module module)
 	{
 		// FIXME with the current implementation there is no synchronous input harvesting
-		//  input parameters will be displayed, but will only work for InteractiveCommands
+		//  input parameters will be displayed, but will only have an effect for InteractiveCommands
 		threadService.queue(() -> {
 			AndroidInputPanel panel = (AndroidInputPanel) inputPanel;
-			Display<Module> display = new DefaultModuleDisplay(module, panel);
+			panel.setLabel(getLabel(module));
+			Display<Module> display = new DefaultModuleDisplay(panel);
 			DisplayWindow window = uiService.getDefaultUI().createDisplayWindow(display);
+			panel.setDisplay(display);
+			panel.setWindow(window);
 			window.setContent(panel);
 			window.showDisplay(true);
 		});
 		return true;
+	}
+
+	private String getLabel(Module module) {
+		return module.getInfo().getTitle();
 	}
 
 	// -- Internal methods --

@@ -29,17 +29,17 @@
 
 package org.scijava.android.ui.viewer.module;
 
-import org.scijava.android.ui.widget.AndroidInputPanel;
+import org.scijava.android.ui.viewer.widget.AndroidInputPanel;
 import org.scijava.display.AbstractDisplay;
 import org.scijava.module.Module;
+import org.scijava.ui.viewer.DisplayWindow;
 
 public class DefaultModuleDisplay extends AbstractDisplay<Module> implements
 	ModuleDisplay
 {
 
-	public DefaultModuleDisplay(Module module, AndroidInputPanel inputPanel) {
+	public DefaultModuleDisplay(AndroidInputPanel inputPanel) {
 		super(Module.class);
 		inputPanel.setDisplay(this);
 	}
-
 }

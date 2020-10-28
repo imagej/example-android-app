@@ -50,9 +50,10 @@ import java.util.concurrent.ThreadFactory;
 
 /**
  * Service for managing active threads on Android.
- * 
- * @author Curtis Rueden
+ * FIXME the Android specific implementations are very much up to debate...
+ *
  * @author Deborah Schmidt
+ * @author Curtis Rueden
  */
 @Plugin(type = Service.class, priority = Priority.HIGH)
 public class AndroidThreadService extends AbstractService implements
@@ -111,7 +112,8 @@ public class AndroidThreadService extends AbstractService implements
 	@Override
 	public void invoke(final Runnable code) throws InterruptedException
 	{
-		androidService.getActivity().runOnUiThread(code);
+		Handler handler = new Handler(Looper.getMainLooper());
+		SynchronousHandler.postAndWait(handler, code);
 	}
 
 	@Override

@@ -34,36 +34,42 @@ import android.view.View;
 import android.view.ViewGroup;
 
 /**
- * Common interface for Android-based data widgets.
+ * Common interface for Android-based data views.
  *
  * @author Deborah Schmidt
  */
 public interface AndroidDataView<W extends View>
 {
 
+	/**
+	 * Creates the {@link View} for the given data type.
+	 * @param parent the {@link ViewGroup} element the new {@link View} will be attached to
+	 */
 	W createView(ViewGroup parent);
-	Class<W> getWidgetType();
 
-	void attach(AndroidViewHolder<W> holder);
-	void detach(AndroidViewHolder<W> holder);
+	/**
+	 * @return The type of {@link View} this data is represented by.
+	 */
+	Class<W> getViewType();
 
-	default AndroidViewHolderBuilder getViewHolderBuilder(ViewAdapter adapter) {
-		return (parent, content) -> new AndroidViewHolder<>(adapter, parent, content, createView(content));
-	}
-	AndroidViewHolder<W> getViewHolder();
+	/**
+	 * Update the data displayed by this view.
+	 */
+	void contentUpdated();
 
-	default void redraw() {
-		updateContent();
-		if(getViewHolder() != null) updateView(getViewHolder().getItem());
-	}
-	default void updateHolder() {
-		if(getViewHolder() == null) return;
-		W item = getViewHolder().getItem();
-		updateView(item);
-	}
-	void updateContent();
+	/**
+	 * Update the view of the data.
+	 * @param item the item displaying the data
+	 */
 	void updateView(W item);
 
+	/**
+	 * @return whether this data view is labeled
+	 */
 	boolean isLabeled();
+
+	/**
+	 * @return the label of this data view
+	 */
 	String getLabel();
 }

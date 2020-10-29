@@ -4,11 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:id="@+id/content"
     android:layout_margin="@dimen/margin">
     <TextView
         android:id="@+id/title"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <FrameLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textStyle="bold"/>
+        android:layout_weight="1" />
 </androidx.appcompat.widget.LinearLayoutCompat>

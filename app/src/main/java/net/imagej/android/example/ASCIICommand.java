@@ -26,13 +26,10 @@ public class ASCIICommand extends DisplayUpdatingInteractiveCommand {
     @Parameter
     private OpService ops;
 
-    @Parameter
-    private LogService log;
-
     @Override
     public void run() {
         if(input == null) {
-            log.error("Input image missing");
+            log().error("Input image missing");
             return;
         }
         RandomAccessibleInterval<UnsignedByteType> gray = Converters.argbChannel(input, 2);
